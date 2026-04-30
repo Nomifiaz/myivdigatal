@@ -4,10 +4,11 @@ import { Mail, Lock, ArrowRight, Chrome, Loader2, AlertCircle } from 'lucide-rea
 import { authService } from '../services/api';
 
 interface LoginFormProps {
-  onForwardType: (type: 'register' | 'forgot') => void;
+  onForwardType: (type: 'register' | 'forgot' | 'onboarding' | 'dashboard') => void;
+  onLoginSuccess: (token: string) => void;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onForwardType }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onForwardType, onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -20,9 +21,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForwardType }) => {
 
     try {
       const data = await authService.login({ email, password });
-      authService.setToken(data.token);
-      alert('Login successful! Token saved.');
-      // In a real app, you would redirect here
+      onLoginSuccess(data.token);
     } catch (err: any) {
       setError(err.message);
     } finally {

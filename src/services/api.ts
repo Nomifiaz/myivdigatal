@@ -1,6 +1,18 @@
 const API_BASE_URL = 'http://localhost:5010/api/v1';
 
 export const authService = {
+  getToken() {
+    return localStorage.getItem('auth_token');
+  },
+
+  getHeaders() {
+    const token = this.getToken();
+    return {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    };
+  },
+
   async login(credentials: any) {
     const response = await fetch(`${API_BASE_URL}/login`, {
       method: 'POST',
@@ -45,12 +57,30 @@ export const authService = {
     return data;
   },
 
-  setToken(token: string) {
-    localStorage.setItem('auth_token', token);
+  // Business APIs
+  async getBusiness() {
+    const response = await fetch(`${API_BASE_URL}/businesses`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch business');
+    return data;
   },
 
-  getToken() {
-    return localStorage.getItem('auth_token');
+  async registerBusiness(businessData: any) {
+    const response = await fetch(`${API_BASE_URL}/businesses`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(businessData),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to register business');
+    return data;
+  },
+
+  setToken(token: string) {
+    localStorage.setItem('auth_token', token);
   },
 
   logout() {

@@ -208,5 +208,15 @@ export const invoiceService = {
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || 'Failed to fetch invoices');
     return data;
+  },
+
+  async getInvoiceById(id: number) {
+    const response = await fetch(`${API_BASE_URL}/invoice/${id}`, {
+      method: 'GET',
+      headers: authService.getHeaders(),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch invoice details');
+    return data;
   }
 };

@@ -1,17 +1,14 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { 
   ArrowLeft, 
   Printer, 
   Download, 
-  ShieldCheck, 
-  CheckCircle2, 
-  Mail, 
-  Phone, 
-  MapPin,
-  Globe,
-  Loader2
+  Loader2,
+  Phone,
+  MessageCircle,
 } from 'lucide-react';
+import { invoiceService } from '../services/api';
 
 interface InvoicePreviewProps {
   invoice: any;
@@ -19,15 +16,42 @@ interface InvoicePreviewProps {
   onBack: () => void;
 }
 
-const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, businessData, onBack }) => {
+const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice, businessData: initialBusinessData, onBack }) => {
+  const [invoice, setInvoice] = useState<any>(initialInvoice);
+  const [isLoading, setIsLoading] = useState(!initialInvoice.InvoiceItems);
+
+  useEffect(() => {
+    const fetchFullInvoice = async () => {
+      if (!initialInvoice.InvoiceItems && initialInvoice.id) {
+        try {
+          const response = await invoiceService.getInvoiceById(initialInvoice.id);
+          setInvoice(response.invoice || response);
+        } catch (err) {
+          console.error("Failed to fetch full invoice:", err);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    fetchFullInvoice();
+  }, [initialInvoice]);
+
   const printInvoice = () => {
     window.print();
   };
 
-  // Mock calculations if data missing from simplified fetch
-  const subtotal = invoice.items?.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0) || 0;
-  const gst = subtotal * 0.18;
-  const total = subtotal + gst;
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <Loader2 className="w-10 h-10 animate-spin text-[#0D47A1] mb-4" />
+        <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Loading Professional Invoice...</p>
+      </div>
+    );
+  }
+
+  const business = invoice.Business || initialBusinessData;
+  const client = invoice.Client || {};
+  const items = invoice.InvoiceItems || invoice.items || [];
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-20">
@@ -59,168 +83,224 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, businessData, 
         </div>
       </div>
 
-      {/* Actual Paper Invoice */}
+      {/* Professional A4 Invoice */}
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white shadow-2xl rounded-none md:rounded-lg overflow-hidden border border-slate-100 print:shadow-none print:border-none"
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-white shadow-2xl rounded-none overflow-hidden print:shadow-none print:m-0"
         id="printable-invoice"
+        style={{ minHeight: '1120px', padding: '40px' }}
       >
-        {/* Blue Header Stripe */}
-        <div className="bg-[#0D47A1] text-white px-10 py-4 flex justify-between items-center">
-            <h2 className="text-sm font-black uppercase tracking-[0.2em]">Sales Tax Invoice</h2>
-            <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-blue-200">FBR Compliant - System Generated</span>
-            </div>
-        </div>
-
-        <div className="p-10 space-y-10">
-            {/* Business Info Layer */}
-            <div className="flex justify-between items-start gap-10">
-                <div className="flex items-center gap-6">
-                    <div className="w-24 h-24 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center text-[#0D47A1] font-black text-xl italic p-2 text-center leading-tight">
-                        {businessData.businessName}
-                    </div>
-                    <div>
-                        <h1 className="text-3xl font-black text-[#0D47A1] tracking-tighter">{businessData.businessName}</h1>
-                        <div className="flex items-center gap-3 mt-1">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">NTN: {businessData.ntn || 'PENDING'}</span>
-                            <div className="w-1 h-1 rounded-full bg-slate-200" />
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">STRN: {businessData.strn || 'PENDING'}</span>
-                        </div>
-                    </div>
-                </div>
-                <div className="text-right space-y-1">
-                    <p className="text-lg font-black text-slate-900">Invoice #: <span className="font-mono">INV-{new Date(invoice.invoiceDate).getFullYear()}{invoice.id.toString().padStart(4, '0')}</span></p>
-                    <p className="text-sm font-bold text-slate-500">Date: {new Date(invoice.invoiceDate).toLocaleDateString()}</p>
-                    <div className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mt-2 ${
-                        invoice.status === 'Paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
-                    }`}>
-                        {invoice.status}
-                    </div>
-                </div>
-            </div>
-
-            {/* Supplier & Buyer Boxes */}
-            <div className="grid grid-cols-2 border border-slate-200 rounded-lg overflow-hidden">
-                <div className="border-r border-slate-200">
-                    <div className="bg-[#0D47A1] text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest">Supplier</div>
-                    <div className="p-6 space-y-3">
-                        <p className="font-black text-slate-900">{businessData.businessName}</p>
-                        <div className="space-y-1 text-xs font-bold text-slate-500">
-                            <div className="flex items-start gap-2">
-                                <MapPin className="w-3 h-3 mt-0.5 shrink-0" />
-                                <span>{businessData.address}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Phone className="w-3 h-3 shrink-0" />
-                                <span>{businessData.phone}</span>
-                            </div>
-                        </div>
+        {/* Header */}
+        <div className="flex justify-between items-start mb-8">
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-[#0D47A1] rounded-lg flex items-center justify-center text-white">
+                    <div className="grid grid-cols-2 gap-0.5">
+                        <div className="w-2.5 h-2.5 bg-white rounded-sm" />
+                        <div className="w-2.5 h-2.5 bg-white/40 rounded-sm" />
+                        <div className="w-2.5 h-2.5 bg-white/40 rounded-sm" />
+                        <div className="w-2.5 h-2.5 bg-white rounded-sm" />
                     </div>
                 </div>
                 <div>
-                    <div className="bg-[#0D47A1] text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest">Buyer</div>
-                    <div className="p-6 space-y-3">
-                        <p className="font-black text-slate-900">{invoice.clientName || 'Cash Customer'}</p>
-                        <div className="space-y-1 text-xs font-bold text-slate-500">
-                            <div className="flex items-start gap-2">
-                                <MapPin className="w-3 h-3 mt-0.5 shrink-0" />
-                                <span>{invoice.clientAddress || 'Default Location'}</span>
+                   <h1 className="text-2xl font-black text-slate-900 tracking-tighter leading-none">{business?.name || business?.businessName}</h1>
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Innovations</p>
+                </div>
+            </div>
+            <div className="text-right">
+                <div className="bg-[#1e40af] text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest mb-3 inline-block">
+                    FBR TAX INVOICE
+                </div>
+                <div className="space-y-0.5">
+                    <p className="text-[11px] font-bold text-slate-900">Invoice #: <span className="font-black text-slate-900">{invoice.invoiceRefNo || `INV-${invoice.id}`}</span></p>
+                    <p className="text-[11px] font-bold text-slate-900">Date: <span className="font-black text-slate-900">{new Date(invoice.invoiceDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div className="h-0.5 bg-[#1e40af] mb-8" />
+
+        {/* Info Blocks */}
+        <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="bg-[#f8fafc] border border-slate-100 rounded-lg overflow-hidden">
+                <div className="bg-[#f8fafc] border-b border-slate-100 px-4 py-2">
+                    <h3 className="text-[10px] font-black text-blue-800 uppercase tracking-widest">SELLER INFORMATION</h3>
+                </div>
+                <div className="p-4 space-y-2">
+                    <p className="text-sm font-black text-slate-900">{business?.name || business?.businessName}</p>
+                    <div className="text-[11px] font-medium text-slate-600 space-y-1">
+                        <p>Province: <span className="font-bold">{business?.province || 'NCR'}</span></p>
+                        <p>Tel: <span className="font-bold text-slate-900">+{business?.phone || '923456789546'}</span></p>
+                    </div>
+                </div>
+            </div>
+            <div className="bg-[#f8fafc] border border-slate-100 rounded-lg overflow-hidden">
+                <div className="bg-[#f8fafc] border-b border-slate-100 px-4 py-2">
+                    <h3 className="text-[10px] font-black text-blue-800 uppercase tracking-widest">BUYER INFORMATION</h3>
+                </div>
+                <div className="p-4 space-y-1.5">
+                    <p className="text-sm font-black text-slate-900">{client?.name || 'Walk-in Customer'}</p>
+                    <div className="text-[11px] font-medium text-slate-600 space-y-1">
+                        <p>Address: <span className="font-bold">{client?.address || 'N/A'}</span></p>
+                        <div className="flex items-center gap-1.5">
+                           <span>Phone:</span>
+                           <div className="flex items-center gap-1 text-emerald-600 font-bold">
+                              <MessageCircle className="w-3 h-3" />
+                              <span>+{client?.phone || '923498282340'}</span>
+                           </div>
+                        </div>
+                        <p>Province: <span className="font-bold">{client?.province || 'NCR'}</span></p>
+                        <p>Status: <span className="text-red-500 font-black">{client?.type || 'Unregistered'}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {/* Table Head */}
+        <div className="bg-[#2b58ae] text-white grid grid-cols-12 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-t-lg">
+            <div className="col-span-1">Sr</div>
+            <div className="col-span-4">Description / HS Code</div>
+            <div className="col-span-1 text-center">Qty/UOM</div>
+            <div className="col-span-2 text-right">Per Unit Price</div>
+            <div className="col-span-1 text-right">Sub Total</div>
+            <div className="col-span-1 text-right">Discount</div>
+            <div className="col-span-2 text-right">Total Value</div>
+        </div>
+
+        {/* Table Content */}
+        <div className="border-x border-b border-slate-200 rounded-b-lg divide-y divide-slate-100">
+            {items.map((item: any, idx: number) => {
+                const totalTaxable = (item.salePriceUnitExclTax || item.price) * item.fbrQty;
+                return (
+                    <div key={idx} className="bg-white">
+                        {/* Main Row */}
+                        <div className="grid grid-cols-12 px-4 py-3 text-[11px] items-start">
+                            <div className="col-span-1 text-slate-400 font-bold">{idx + 1}</div>
+                            <div className="col-span-4 pr-4">
+                                <p className="font-black text-slate-900">{item.Product?.productName || item.productName || 'Product Title'}</p>
+                                <p className="text-[10px] text-slate-500 mt-0.5">{item.hsCode || item.Product?.hsCode || '0000.0000'}</p>
                             </div>
-                            <div className="flex items-center gap-2 text-emerald-600">
-                                <Phone className="w-3 h-3 shrink-0" />
-                                <span>+92 {invoice.clientPhone || '0000000000'}</span>
+                            <div className="col-span-1 text-center font-bold">
+                                {item.fbrQty || item.quantity}
+                                <p className="text-[8px] text-slate-400 uppercase font-black tracking-tighter mt-0.5">{item.uom || item.Product?.uom || 'piece'}</p>
+                            </div>
+                            <div className="col-span-2 text-right font-black">{(item.salePriceUnitExclTax || item.price).toLocaleString()}</div>
+                            <div className="col-span-1 text-right font-black">{(item.taxableValue || totalTaxable).toLocaleString()}</div>
+                            <div className="col-span-1 text-right font-black text-slate-300">-</div>
+                            <div className="col-span-2 text-right font-black bg-[#fffce0] py-2 px-2 rounded -my-2">
+                                {(item.valueInclTax || item.totalInclTax).toLocaleString()}
+                            </div>
+                        </div>
+                        {/* Tax Row */}
+                        <div className="grid grid-cols-12 px-4 py-2 text-[9px] bg-[#f8fafc] border-t border-slate-50 italic">
+                            <div className="col-span-4">
+                                <p className="font-black text-slate-500">Sale Type</p>
+                                <p className="font-medium text-slate-400 truncate">{item.saleType || 'Goods at standard rate (default)'}</p>
+                            </div>
+                            <div className="col-span-2">
+                                <p className="font-black text-slate-500">Taxable Value</p>
+                                <p className="font-medium text-slate-400">Price {(item.salePriceUnitExclTax || item.price)} x {(item.fbrQty || item.quantity)}</p>
+                                <p className="font-black text-slate-900">{(item.taxableValue || totalTaxable).toLocaleString()}</p>
+                            </div>
+                            <div className="col-span-1 text-center">
+                                <p className="font-black text-slate-500 uppercase">GST</p>
+                                <p className="font-black text-blue-700">{item.gstPercent || item.gstRate}%</p>
+                                <p className="font-bold">{(item.gstAmt).toFixed(2)}</p>
+                            </div>
+                            <div className="col-span-1 text-center">
+                                <p className="font-black text-slate-500 uppercase">F.Tax</p>
+                                <p className="font-black text-blue-700">{item.ftPercent || item.ftRate || 0}%</p>
+                                <p className="font-bold">{(item.ftAmt || 0).toFixed(2)}</p>
+                            </div>
+                            <div className="col-span-1 text-center">
+                                <p className="font-black text-slate-500 uppercase">FED</p>
+                                <p className="font-black text-blue-700">{item.fedPercent || item.fedRate || 0}%</p>
+                                <p className="font-bold">{(item.fedAmt || 0).toFixed(2)}</p>
+                            </div>
+                            <div className="col-span-1 text-center">
+                                <p className="font-black text-slate-500 uppercase">Extra</p>
+                                <p className="font-black text-blue-700">{item.extPercent || item.extRate || 0}%</p>
+                                <p className="font-bold">{(item.extAmt || 0).toFixed(2)}</p>
+                            </div>
+                            <div className="col-span-1 text-center">
+                                <p className="font-black text-emerald-600 uppercase">Total Tax</p>
+                                <p className="font-black text-emerald-700">{(item.totalTax).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                            </div>
+                            <div className="col-span-1 text-right">
+                                <p className="font-black text-blue-800 uppercase">Total + Tax</p>
+                                <p className="font-black text-blue-900 text-[10px]">{(item.valueInclTax || item.totalInclTax).toLocaleString()}</p>
                             </div>
                         </div>
                     </div>
+                );
+            })}
+        </div>
+
+        {/* QR & Totals */}
+        <div className="grid grid-cols-12 gap-8 items-start mt-12 mb-12">
+            <div className="col-span-5">
+                <div className="aspect-square bg-amber-50 border-2 border-amber-200 rounded-2xl flex flex-col items-center justify-center p-8 text-center border-dashed">
+                    <p className="text-amber-700 font-black text-sm uppercase tracking-widest leading-tight">Pending FBR Submission</p>
+                    <p className="text-amber-500 text-[10px] font-bold mt-2">QR code will appear after FBR submission</p>
                 </div>
             </div>
-
-            {/* Line Items Table */}
-            <div className="border border-slate-200 rounded-lg overflow-hidden">
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-[#0D47A1] border-b border-slate-200">
-                            <th className="px-6 py-4">SR#</th>
-                            <th className="px-6 py-4">Item Description & HS Code</th>
-                            <th className="px-6 py-4 text-center">Qty</th>
-                            <th className="px-6 py-4 text-right">Rate</th>
-                            <th className="px-6 py-4 text-right">Excl. Tax</th>
-                            <th className="px-6 py-4 text-center">Tax%</th>
-                            <th className="px-6 py-4 text-right">Tax Amt</th>
-                            <th className="px-6 py-4 text-right">Incl. Tax</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 text-xs font-bold text-slate-700">
-                        {(invoice.items || []).map((item: any, idx: number) => (
-                            <tr key={idx}>
-                                <td className="px-6 py-4 text-slate-400">{idx + 1}</td>
-                                <td className="px-6 py-4">
-                                    <p className="text-slate-900 font-black">{item.productName}</p>
-                                    <p className="text-[10px] text-[#0D47A1]">HS: {item.hsCode || '2820.1010'}</p>
-                                </td>
-                                <td className="px-6 py-4 text-center">
-                                    {item.quantity}
-                                    <p className="text-[9px] text-slate-400 uppercase">piece</p>
-                                </td>
-                                <td className="px-6 py-4 text-right">{item.price.toLocaleString()}</td>
-                                <td className="px-6 py-4 text-right">{(item.price * item.quantity).toLocaleString()}</td>
-                                <td className="px-6 py-4 text-center text-emerald-600 font-black">18%</td>
-                                <td className="px-6 py-4 text-right">{((item.price * item.quantity) * 0.18).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                                <td className="px-6 py-4 text-right font-black">{(item.price * item.quantity * 1.18).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Totals Section */}
-            <div className="flex justify-end pt-10">
-                <div className="w-80 space-y-4">
-                    <div className="grid grid-cols-2 text-sm">
-                        <span className="font-black text-slate-900">Subtotal</span>
-                        <span className="text-right font-black text-slate-900">PKR {subtotal.toLocaleString()}</span>
+            <div className="col-span-7">
+                <div className="border border-slate-100 rounded-xl overflow-hidden shadow-sm">
+                    <div className="p-4 grid grid-cols-2 text-xs font-bold items-center">
+                        <p className="text-slate-500">Total Value (Excl. Tax)</p>
+                        <p className="text-right text-slate-900 font-black">{invoice.subtotal?.toLocaleString()}</p>
                     </div>
-                    <div className="grid grid-cols-2 text-sm py-2">
-                        <span className="text-slate-500 font-bold">Sales Tax 18%</span>
-                        <span className="text-right text-slate-500 font-bold">PKR {gst.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <div className="p-4 grid grid-cols-2 text-xs font-bold items-center border-t border-slate-50">
+                        <p className="text-slate-500">Total GST</p>
+                        <p className="text-right text-slate-900 font-black">{invoice.totalGST?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                     </div>
-                    <div className="grid grid-cols-2 text-lg border-t-2 border-[#0D47A1] pt-4">
-                        <span className="font-black text-[#0D47A1]">Total</span>
-                        <span className="text-right font-black text-[#0D47A1]">PKR {total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <div className="p-5 grid grid-cols-2 text-lg font-black items-center bg-[#2b58ae] text-white">
+                        <p className="uppercase tracking-tighter text-sm">Grand Total</p>
+                        <p className="text-right tracking-tight">Rs {invoice.grandTotal?.toLocaleString()}</p>
+                    </div>
+                    <div className="p-3 grid grid-cols-2 text-xs font-black items-center bg-red-50 text-red-600">
+                        <p className="uppercase tracking-widest text-[10px]">Amount Due</p>
+                        <p className="text-right">Rs {invoice.grandTotal?.toLocaleString()}</p>
                     </div>
                 </div>
             </div>
+        </div>
 
-            {/* Footer Branding */}
-            <div className="pt-20 flex items-center justify-center gap-4 text-[10px] font-bold text-slate-400 no-print">
-                <div className="w-6 h-6 bg-slate-900 rounded-md flex items-center justify-center text-white text-[8px] font-black">FBR</div>
-                <p>Powered by <span className="text-slate-900 font-black">Invoizeo Digital</span> — Pakistan's FBR Digital Invoicing Platform</p>
+        {/* Bottom Footer */}
+        <div className="mt-auto pt-12 border-t border-slate-100 text-[10px] text-slate-400">
+            <div className="flex justify-between items-end">
+                <div>
+                    <p className="font-black text-slate-900 mb-1">{business?.name || business?.businessName}</p>
+                    <p>Tel: +{business?.phone || '923456789546'}</p>
+                </div>
+                <div className="text-right space-y-1">
+                    <p className="font-bold">Generated: {new Date().toLocaleString()}</p>
+                    <p className="font-black text-slate-900 tracking-widest">This is a computer-generated document</p>
+                </div>
             </div>
         </div>
       </motion.div>
-      
-      {/* Print Specific CSS */}
+
+      {/* Print Styles */}
       <style>{`
         @media print {
-          body * {
-            visibility: hidden;
-          }
-          #printable-invoice, #printable-invoice * {
-            visibility: visible;
-          }
-          #printable-invoice {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
+          @page {
+            size: A4;
             margin: 0;
-            padding: 0;
-            border: none;
+          }
+          body {
+            background: white;
           }
           .no-print {
             display: none !important;
+          }
+          #printable-invoice {
+            width: 100% !important;
+            min-height: 100vh !important;
+            padding: 20mm !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            border: none !important;
           }
         }
       `}</style>

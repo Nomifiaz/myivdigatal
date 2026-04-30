@@ -61,75 +61,102 @@ const Overview: React.FC<{ businessData: any }> = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Total Revenue', value: '$128,430', change: '+12.5%', icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-          { label: 'Active Clients', value: '1,240', change: '+5.2%', icon: Users, color: 'text-blue-500', bg: 'bg-blue-50' },
+          { label: 'Total Revenue', value: '$128,430', change: '+12.5%', icon: TrendingUp, color: 'text-[#0D47A1]', bg: 'bg-blue-50' },
+          { label: 'Active Clients', value: '1,240', change: '+5.2%', icon: Users, color: 'text-[#00B8D4]', bg: 'bg-cyan-50' },
           { label: 'Pending Payouts', value: '$12,400', change: '-2.1%', icon: CreditCard, color: 'text-amber-500', bg: 'bg-amber-50' },
           { label: 'Inventory Level', value: '94%', change: 'Normal', icon: Package, color: 'text-slate-500', bg: 'bg-slate-50' },
         ].map((stat, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+          <div key={idx} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div className={`p-2.5 rounded-xl ${stat.bg} ${stat.color}`}>
                 <stat.icon className="w-5 h-5" />
               </div>
-              <span className={`text-xs font-bold px-2 py-1 rounded-full ${stat.change.startsWith('+') ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-500'}`}>
+              <span className={`text-[10px] font-black px-2 py-1 rounded-lg ${stat.change.startsWith('+') ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
                 {stat.change}
               </span>
             </div>
-            <p className="text-sm font-semibold text-slate-500">{stat.label}</p>
-            <h3 className="text-2xl font-bold text-slate-900 mt-1">{stat.value}</h3>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{stat.label}</p>
+            <h3 className="text-2xl font-black text-slate-900 mt-1">{stat.value}</h3>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
+          <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm p-8">
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-lg font-bold text-slate-900">Revenue Distribution</h3>
-              <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-slate-900"></div>
-                <div className="w-3 h-3 rounded-full bg-slate-200"></div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Revenue Analytics</h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Net growth comparison (Monthly)</p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-[#0D47A1]"></div>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase">Revenue</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-slate-100"></div>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase">Previous</span>
+                </div>
               </div>
             </div>
             <div className="h-64 flex items-end gap-2 px-2">
               {[40, 60, 45, 90, 65, 80, 55, 70, 95, 60, 50, 85].map((val, i) => (
-                <div key={i} className="flex-1 bg-slate-900 rounded-t-md opacity-20 hover:opacity-100 transition-opacity cursor-pointer relative group">
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                    ${val}k
+                <div key={i} className="flex-1 group relative flex flex-col items-center justify-end h-full">
+                  <div className="absolute -top-8 bg-[#0D47A1] text-white text-[10px] font-black py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none shadow-lg">
+                    PKR {val}k
                   </div>
-                  <div style={{ height: `${val}%` }} className="w-full bg-slate-900 rounded-t-md" />
+                  <div className="w-full bg-slate-50 rounded-t-xl h-full absolute inset-0 pointer-events-none" />
+                  <motion.div 
+                    initial={{ height: 0 }}
+                    animate={{ height: `${val}%` }}
+                    transition={{ delay: i * 0.05, duration: 0.8, ease: "easeOut" }}
+                    className="w-full bg-gradient-to-t from-[#0D47A1] to-[#00B8D4] rounded-t-xl z-[1] cursor-pointer"
+                  />
                 </div>
+              ))}
+            </div>
+            <div className="flex justify-between mt-6 px-1">
+              {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(m => (
+                <span key={m} className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{m}</span>
               ))}
             </div>
           </div>
           
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden">
             <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900">Recent Invoices</h3>
-              <button className="text-sm font-bold text-[#0D47A1] hover:underline">View All</button>
+              <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Recent Invoices</h3>
+              <button className="text-xs font-black text-[#0D47A1] hover:text-[#00B8D4] uppercase tracking-widest transition-colors">View All Archive</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
                   <tr className="bg-slate-50/50">
-                    <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Client</th>
-                    <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Amount</th>
-                    <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Status</th>
+                    <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Client / Partner</th>
+                    <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Net Amount</th>
+                    <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Clearance Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {[
-                    { client: 'Acme Corp', amount: '$4,500', status: 'Paid' },
-                    { client: 'Globex Ltd', amount: '$2,100', status: 'Pending' },
-                    { client: 'Soylent Inc', amount: '$8,900', status: 'Overdue' },
+                    { client: 'Acme Corp Solutions', amount: '$4,500', status: 'Paid', icon: 'AC' },
+                    { client: 'Globex Digital Ltd', amount: '$2,100', status: 'Pending', icon: 'GD' },
+                    { client: 'Soylent Energy Inc', amount: '$8,900', status: 'Overdue', icon: 'SE' },
                   ].map((row, i) => (
-                    <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-8 py-4 font-bold text-slate-900">{row.client}</td>
-                      <td className="px-8 py-4 text-slate-500 text-sm">{row.amount}</td>
-                      <td className="px-8 py-4">
-                        <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
-                          row.status === 'Paid' ? 'bg-emerald-50 text-emerald-600' : 
-                          row.status === 'Pending' ? 'bg-amber-50 text-amber-600' : 'bg-red-50 text-red-600'
+                    <tr key={i} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-8 py-5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400">
+                            {row.icon}
+                          </div>
+                          <span className="font-bold text-slate-900 text-sm">{row.client}</span>
+                        </div>
+                      </td>
+                      <td className="px-8 py-5 text-slate-600 text-sm font-black">{row.amount}</td>
+                      <td className="px-8 py-5">
+                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.1em] ${
+                          row.status === 'Paid' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 
+                          row.status === 'Pending' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-red-50 text-red-600 border border-red-100'
                         }`}>
                           {row.status}
                         </span>
@@ -143,12 +170,47 @@ const Overview: React.FC<{ businessData: any }> = () => {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-[#0f172a] rounded-3xl p-8 text-white relative overflow-hidden">
-            <HelpCircle className="absolute -right-6 -top-6 w-32 h-32 text-white/5 opacity-50" />
-            <h4 className="text-lg font-bold mb-2">Need Assistance?</h4>
-            <p className="text-slate-400 text-sm mb-6 leading-relaxed">Our account specialists are available 24/7 to help with your enterprise configuration.</p>
-            <button className="w-full py-3.5 bg-white text-slate-900 rounded-xl font-bold text-sm tracking-tight hover:bg-slate-50 active:scale-95 transition-all">
-              Chat with Support
+          <div className="bg-gradient-to-br from-[#0D47A1] to-[#00B8D4] rounded-[32px] p-8 text-white relative overflow-hidden shadow-xl shadow-blue-900/20 group">
+            <HelpCircle className="absolute -right-6 -top-6 w-40 h-40 text-white/10 group-hover:scale-110 transition-transform duration-700" />
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-white/20 rounded-lg backdrop-blur-md">
+                <ShieldCheck className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Priority Support</span>
+            </div>
+            <h4 className="text-xl font-black mb-2 uppercase tracking-tight leading-tight">Need Operations Assistance?</h4>
+            <p className="text-blue-50/70 text-xs mb-8 font-medium leading-relaxed">Our Invoizeo account specialists are available 24/7 to help with your enterprise financial workflows.</p>
+            <button className="w-full py-4 bg-white text-[#0D47A1] rounded-2xl font-black text-sm uppercase tracking-widest hover:shadow-2xl active:scale-95 transition-all shadow-lg">
+              Open Support Case
+            </button>
+          </div>
+
+          <div className="bg-white rounded-[32px] border border-slate-200 p-8 shadow-sm">
+            <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-6">Financial Growth</h4>
+            <div className="space-y-6">
+              {[
+                { label: 'EBITDA Margin', value: '32%', color: 'bg-[#0D47A1]' },
+                { label: 'OPEX Efficiency', value: '84%', color: 'bg-[#00B8D4]' },
+                { label: 'Cash Liquidity', value: '61%', color: 'bg-emerald-500' },
+              ].map((item, i) => (
+                <div key={i} className="space-y-2 text-[10px] font-bold uppercase tracking-widest">
+                  <div className="flex justify-between items-center text-slate-400">
+                    <span>{item.label}</span>
+                    <span className="text-slate-900">{item.value}</span>
+                  </div>
+                  <div className="h-2 bg-slate-50 rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: item.value }}
+                      transition={{ delay: 0.5 + (i * 0.1), duration: 1 }}
+                      className={`h-full ${item.color}`}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button className="w-full mt-8 py-3 bg-slate-50 text-slate-900 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-colors">
+              Full Financial Audit
             </button>
           </div>
         </div>

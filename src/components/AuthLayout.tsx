@@ -55,7 +55,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitle }) =>
               transition={{ delay: 0.4 }}
               className="bg-white/5 backdrop-blur-xl border border-white/10 p-4 rounded-2xl flex items-center gap-4 max-w-sm"
             >
-              <div className="bg-blue-500/20 p-2 rounded-xl text-blue-400">
+              <div className="bg-[#0D47A1]/20 p-2 rounded-xl text-[#0D47A1]">
                 <Activity className="w-5 h-5" />
               </div>
               <div>

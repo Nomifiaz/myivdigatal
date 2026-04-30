@@ -94,9 +94,11 @@ const Inventory: React.FC<InventoryProps> = ({ businessId }) => {
     try {
       setIsLoading(true);
       const data = await productService.getProducts(businessId);
-      setProducts(data);
+      // Ensure data is an array
+      setProducts(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError(err.message);
+      setProducts([]); // Fallback to empty array on error
     } finally {
       setIsLoading(false);
     }
@@ -147,6 +149,18 @@ const Inventory: React.FC<InventoryProps> = ({ businessId }) => {
 
   const calculateTax = (price: number, rate: number) => {
     return (price * rate) / 100;
+  };
+
+  const [isSearchingHS, setIsSearchingHS] = useState(false);
+
+  const searchHSCode = () => {
+    if (!formData.hsCode) return;
+    setIsSearchingHS(true);
+    // Mock API delay
+    setTimeout(() => {
+      setIsSearchingHS(false);
+      // Logic for selecting from search results would go here
+    }, 1500);
   };
 
   const filteredProducts = products.filter(p => 
@@ -395,8 +409,16 @@ const Inventory: React.FC<InventoryProps> = ({ businessId }) => {
                             placeholder="0000.0000"
                             className="w-full pl-4 pr-10 py-3 bg-red-50/30 border-2 border-red-100 rounded-xl font-mono text-xs font-bold text-red-900 outline-none focus:border-red-400 transition-all placeholder:text-red-200"
                           />
-                          <button className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-slate-900 transition-colors">
-                            <Search className="w-3 h-3" />
+                          <button 
+                            onClick={searchHSCode}
+                            disabled={isSearchingHS}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-slate-900 transition-colors disabled:opacity-50"
+                          >
+                            {isSearchingHS ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Search className="w-3 h-3" />
+                            )}
                           </button>
                         </div>
                       </div>

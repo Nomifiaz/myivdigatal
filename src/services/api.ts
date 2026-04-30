@@ -1,5 +1,5 @@
-const API_BASE_URL = 'https://7277-182-180-130-107.ngrok-free.app/api/v1'.trim();
-const BASE_DOMAIN = 'https://7277-182-180-130-107.ngrok-free.app';
+const API_BASE_URL = 'http://localhost:5010/api/v1'.trim();
+const BASE_DOMAIN = 'http://localhost:5010';
 
 export const authService = {
   getLogoUrl(path: string | null) {

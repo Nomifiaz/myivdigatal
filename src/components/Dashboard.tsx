@@ -34,133 +34,103 @@ type Tab = 'dashboard' | 'business-setup' | 'products' | 'invoices';
 const Dashboard: React.FC<DashboardProps> = ({ businessData, onLogout }) => {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
 
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'business-setup', label: 'Business Setup', icon: Building2 },
-    { id: 'products', label: 'Products', icon: Package },
-    { id: 'invoices', label: 'Invoices', icon: FileText },
-  ];
-
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#0f172a] text-white flex flex-col fixed inset-y-0 z-50">
-        <div className="p-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="bg-blue-600 p-2 rounded-xl">
-              <Building2 className="w-6 h-6" />
+    <div className="min-h-screen bg-[#f8fafc]">
+      {/* Horizontal Header */}
+      <header className="fixed top-0 left-0 right-0 h-20 bg-white border-b border-slate-200 z-50 px-6 sm:px-10 flex items-center justify-between">
+        <div className="flex items-center gap-10">
+          <div className="flex items-center gap-2">
+            <div className="bg-slate-900 p-2 rounded-xl text-white">
+              <Building2 className="w-5 h-5" />
             </div>
-            <div>
-              <h1 className="text-lg font-bold leading-none">BizManager Pro</h1>
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-1">Enterprise Edition</p>
-            </div>
+            <span className="text-xl font-bold tracking-tight text-slate-900">
+              BizManager
+            </span>
           </div>
-        </div>
-
-        <nav className="flex-1 px-4 space-y-2">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id as Tab)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${
-                activeTab === item.id 
-                ? 'bg-slate-800 text-white shadow-lg' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-              }`}
-            >
-              <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-blue-400' : 'group-hover:text-blue-400'}`} />
-              <span className="text-sm font-semibold">{item.label}</span>
-              {activeTab === item.id && <motion.div layoutId="nav-indicator" className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400" />}
-            </button>
-          ))}
-        </nav>
-
-        <div className="p-6 mt-auto border-t border-slate-800">
-          <button className="flex items-center gap-3 px-4 py-2 hover:text-white text-slate-400 transition-colors mb-4 w-full text-left">
-            <Settings className="w-5 h-5" />
-            <span className="text-sm font-medium">Settings</span>
-          </button>
-          <button className="flex items-center gap-3 px-4 py-2 hover:text-white text-slate-400 transition-colors w-full text-left">
-            <HelpCircle className="w-5 h-5" />
-            <span className="text-sm font-medium">Support</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Container */}
-      <div className="flex-1 ml-64 flex flex-col">
-        {/* Header */}
-        <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-10 sticky top-0 z-40">
-          <div className="flex items-center gap-4 flex-1">
-            <h2 className="text-xl font-bold text-slate-900 capitalize hidden sm:block">
-              {activeTab.replace('-', ' ')}
-            </h2>
-            <div className="relative max-w-md w-full ml-8">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input 
-                type="text" 
-                placeholder="Quick Search..."
-                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-600/5 focus:border-blue-600 transition-all"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-8 mr-4 hidden lg:flex">
-              <a href="#" className="text-sm font-bold text-slate-500 hover:text-slate-900">Overview</a>
-              <a href="#" className="text-sm font-bold text-slate-500 hover:text-slate-900">Reports</a>
-              <a href="#" className="text-sm font-bold text-slate-500 hover:text-slate-900">Team</a>
-            </div>
-            
-            <button className="relative p-2 text-slate-400 hover:text-slate-900 transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-            </button>
-
-            <div className="h-8 w-px bg-slate-200" />
-
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-sm font-bold text-slate-900 leading-none">{businessData?.name}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">Enterprise Admin</p>
-              </div>
-              <button 
-                onClick={onLogout}
-                className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-slate-900/20 overflow-hidden group relative"
-                title="Logout"
+          
+          <nav className="hidden md:flex items-center gap-1">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+              { id: 'business-setup', label: 'Business Setup', icon: Building2 },
+              { id: 'products', label: 'Products', icon: Package },
+              { id: 'invoices', label: 'Invoices', icon: FileText },
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id as Tab)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-sm ${
+                  activeTab === item.id 
+                  ? 'bg-slate-900 text-white shadow-lg' 
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                }`}
               >
-                {businessData?.logo ? (
-                  <img src={authService.getLogoUrl(businessData.logo) || ''} alt="L" className="w-full h-full object-cover" />
-                ) : (
-                  (businessData?.name?.substring(0, 2) || 'MB')
-                )}
-                <div className="absolute inset-0 bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <LogOut className="w-4 h-4" />
-                </div>
+                <item.icon className="w-4 h-4" />
+                {item.label}
               </button>
-            </div>
-          </div>
-        </header>
+            ))}
+          </nav>
+        </div>
 
-        {/* Content */}
-        <main className="p-10 max-w-[1600px] mx-auto w-full flex-1">
-          <AnimatePresence mode="wait">
-            {activeTab === 'dashboard' && <Overview businessData={businessData} />}
-            {activeTab === 'business-setup' && <BusinessSetup businessData={businessData} />}
-            {(activeTab === 'products' || activeTab === 'invoices') && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="h-[60vh] bg-white rounded-3xl border border-slate-200 border-dashed flex flex-col items-center justify-center text-slate-400"
-              >
-                <Package className="w-12 h-12 mb-4 opacity-20" />
-                <p className="font-bold text-lg">{activeTab.toUpperCase()} Module</p>
-                <p className="text-sm">Currently under enterprise synchronization.</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </main>
-      </div>
+        <div className="flex items-center gap-4">
+          <div className="relative group hidden lg:block">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Quick search..."
+              className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-900 w-48 transition-all"
+            />
+          </div>
+          
+          <button className="p-2 text-slate-400 hover:text-slate-900 transition-colors relative">
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+          </button>
+          
+          <div className="h-8 w-px bg-slate-200 mx-2"></div>
+          
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
+              <p className="text-xs font-bold text-slate-900 leading-none">{businessData?.name}</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">Enterprise Admin</p>
+            </div>
+            <button 
+              onClick={onLogout}
+              className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-slate-900/20 overflow-hidden group"
+              title="Logout"
+            >
+              {businessData?.logo ? (
+                <img src={authService.getLogoUrl(businessData.logo) || ''} alt="L" className="w-full h-full object-cover" />
+              ) : (
+                (businessData?.name?.substring(0, 2) || 'MB')
+              )}
+              <div className="absolute inset-0 bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <LogOut className="w-4 h-4" />
+              </div>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="pt-32 pb-16 px-6 sm:px-10 max-w-7xl mx-auto">
+        <AnimatePresence mode="wait">
+          {activeTab === 'dashboard' && <Overview key="overview" businessData={businessData} />}
+          {activeTab === 'business-setup' && <BusinessSetup key="setup" businessData={businessData} />}
+          {(activeTab === 'products' || activeTab === 'invoices') && (
+            <motion.div 
+              key="placeholder"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="h-[60vh] bg-white rounded-3xl border border-slate-200 border-dashed flex flex-col items-center justify-center text-slate-400"
+            >
+              <Package className="w-12 h-12 mb-4 opacity-20" />
+              <p className="font-bold text-lg">{activeTab.toUpperCase()} Module</p>
+              <p className="text-sm">Currently under enterprise synchronization.</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
     </div>
   );
 };

@@ -59,15 +59,26 @@ const Dashboard: React.FC<DashboardProps> = ({ businessData, onLogout }) => {
             <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
           <div className="h-8 w-px bg-slate-200 mx-2"></div>
-          <button 
-            onClick={onLogout}
-            className="flex items-center gap-2 p-1 pl-3 rounded-full hover:bg-slate-50 border border-slate-200 transition-all group"
-          >
-            <span className="text-sm font-semibold text-slate-700">{businessData?.name || 'My Business'}</span>
-            <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold text-xs uppercase tracking-tighter">
-              {businessData?.name?.substring(0, 2) || 'MB'}
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:block text-right">
+              <p className="text-xs font-bold text-slate-900 leading-none">{businessData?.name || 'My Business'}</p>
+              <p className="text-[10px] font-medium text-slate-400 uppercase tracking-tighter mt-1">Enterprise Admin</p>
             </div>
-          </button>
+            <button 
+              onClick={onLogout}
+              className="flex items-center gap-2 p-1 pl-1 rounded-full hover:bg-slate-50 border border-slate-200 transition-all group lg:min-w-[44px]"
+              title="Logout"
+            >
+              <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold text-xs uppercase tracking-tighter shrink-0 ring-offset-2 group-hover:ring-2 ring-slate-900 transition-all">
+                {businessData?.logo ? (
+                  <img src={businessData.logo} alt="L" className="w-full h-full object-cover rounded-full" />
+                ) : (
+                  (businessData?.name?.substring(0, 2) || 'MB')
+                )}
+              </div>
+              <LogOut className="w-4 h-4 text-slate-400 group-hover:text-red-600 transition-colors pr-1" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -199,8 +210,12 @@ const Dashboard: React.FC<DashboardProps> = ({ businessData, onLogout }) => {
           <div className="space-y-6">
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-slate-950 rounded-2xl flex items-center justify-center text-white">
-                  <ShieldCheck className="w-6 h-6" />
+                <div className="w-12 h-12 bg-slate-950 rounded-2xl flex items-center justify-center text-white overflow-hidden">
+                  {businessData?.logo ? (
+                    <img src={businessData.logo} alt="Logo" className="w-full h-full object-cover" />
+                  ) : (
+                    <ShieldCheck className="w-6 h-6" />
+                  )}
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-900">Compliance Status</h3>
@@ -210,16 +225,22 @@ const Dashboard: React.FC<DashboardProps> = ({ businessData, onLogout }) => {
               <div className="space-y-4">
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Business NTN</p>
-                  <p className="text-sm font-mono font-bold text-slate-900">{businessData?.ntn || '1234567-8'}</p>
+                  <p className="text-sm font-mono font-bold text-slate-900">{businessData?.ntn || 'N/A'}</p>
                 </div>
+                {businessData?.cnic && (
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Proprietor CNIC</p>
+                    <p className="text-sm font-mono font-bold text-slate-900">{businessData.cnic}</p>
+                  </div>
+                )}
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Province</p>
                   <p className="text-sm font-bold text-slate-900">{businessData?.province || 'Punjab'}</p>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">FBR Sandbox</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">FBR Status</p>
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-bold text-emerald-600">Enabled</p>
+                    <p className="text-sm font-bold text-emerald-600">{businessData?.isFbrEnabled ? 'Live' : 'Sandbox Ready'}</p>
                     <Settings className="w-4 h-4 text-slate-300" />
                   </div>
                 </div>

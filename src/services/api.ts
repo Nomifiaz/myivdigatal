@@ -72,11 +72,12 @@ export const authService = {
     return data;
   },
 
-  async registerBusiness(businessData: any) {
+  async registerBusiness(businessData: FormData) {
+    const token = this.getToken();
     const response = await fetch(`${API_BASE_URL}/businesses`, {
       method: 'POST',
-      headers: this.getHeaders(),
-      body: JSON.stringify(businessData),
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      body: businessData,
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || 'Failed to register business');

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'motion/react';
 import { 
   Building2, 
@@ -9,8 +9,9 @@ import {
   Loader2, 
   AlertCircle,
   Building,
-  Globe,
-  CreditCard
+  Upload,
+  X,
+  Image as ImageIcon
 } from 'lucide-react';
 import { authService } from '../services/api';
 
@@ -21,6 +22,9 @@ interface OnboardingProps {
 const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [formData, setFormData] = useState({
     name: '',
     ntn: '',
@@ -28,7 +32,8 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     address: '',
     province: 'Punjab',
     fbrSandboxToken: '',
-    fbrProductionToken: ''
+    fbrProductionToken: '',
+    logo: null as File | null
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,7 +42,14 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     setError(null);
 
     try {
-      await authService.registerBusiness(formData);
+      const data = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== null) {
+          data.append(key, value as string | Blob);
+        }
+      });
+
+      await authService.registerBusiness(data);
       onComplete();
     } catch (err: any) {
       setError(err.message);
@@ -48,6 +60,24 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData(prev => ({ ...prev, logo: file }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeLogo = () => {
+    setFormData(prev => ({ ...prev, logo: null }));
+    setLogoPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   return (
@@ -91,6 +121,59 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Logo Upload Section */}
+          <section className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="px-8 py-6 border-b border-slate-100 flex items-center gap-3">
+              <ImageIcon className="w-5 h-5 text-slate-400" />
+              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-widest">Brand Identity</h2>
+            </div>
+            <div className="p-8 flex flex-col items-center">
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className={`w-full max-w-md aspect-video rounded-3xl border-2 border-dashed transition-all cursor-pointer flex flex-col items-center justify-center relative overflow-hidden group ${
+                  logoPreview ? 'border-slate-300' : 'border-slate-200 hover:border-slate-400 bg-slate-50'
+                }`}
+              >
+                {logoPreview ? (
+                  <>
+                    <img src={logoPreview} alt="Logo Preview" className="w-full h-full object-contain" />
+                    <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <p className="text-white font-bold text-sm">Change Image</p>
+                    </div>
+                    <button 
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeLogo();
+                      }}
+                      className="absolute top-4 right-4 p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/40 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-4 text-slate-400 group-hover:text-slate-600 transition-colors">
+                      <Upload className="w-8 h-8" />
+                    </div>
+                    <h3 className="font-bold text-slate-900">Drag and drop business logo</h3>
+                    <p className="text-xs text-slate-400 mt-1 uppercase tracking-widest">SVG, PNG, JPG (max 2MB)</p>
+                  </>
+                )}
+                <input 
+                  type="file" 
+                  ref={fileInputRef}
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={handleLogoChange}
+                />
+              </div>
+              <p className="mt-4 text-xs text-slate-400 text-center max-w-sm">
+                Your logo will appear on all outgoing invoices and enterprise reports.
+              </p>
+            </div>
+          </section>
+
           {/* General Information Section */}
           <section className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="px-8 py-6 border-b border-slate-100 flex items-center gap-3">

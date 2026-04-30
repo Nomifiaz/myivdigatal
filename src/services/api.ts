@@ -143,3 +143,47 @@ export const productService = {
     return data;
   }
 };
+
+export const clientService = {
+  async addClient(client: any) {
+    const response = await fetch(`${API_BASE_URL}/clients`, {
+      method: 'POST',
+      headers: authService.getHeaders(),
+      body: JSON.stringify(client),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to add client');
+    return data;
+  },
+
+  async getClients() {
+    const response = await fetch(`${API_BASE_URL}/clients`, {
+      method: 'GET',
+      headers: authService.getHeaders(),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch clients');
+    return data;
+  },
+
+  async updateClient(id: number, updates: any) {
+    const response = await fetch(`${API_BASE_URL}/clients?id=${id}`, {
+      method: 'PATCH',
+      headers: authService.getHeaders(),
+      body: JSON.stringify(updates),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to update client');
+    return data;
+  },
+
+  async deleteClient(id: number) {
+    const response = await fetch(`${API_BASE_URL}/clients?id=${id}`, {
+      method: 'DELETE',
+      headers: authService.getHeaders(),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to delete client');
+    return data;
+  }
+};

@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { Logo } from './Brand';
 import Inventory from './Inventory';
+import Clients from './Clients';
 import { authService } from '../services/api';
 
 interface DashboardProps {
@@ -32,9 +33,9 @@ interface DashboardProps {
   onLogout: () => void;
 }
 
-type Tab = 'dashboard' | 'business-setup' | 'products' | 'invoices';
+type Tab = 'dashboard' | 'business-setup' | 'products' | 'invoices' | 'clients';
 
-const Overview: React.FC<{ businessData: any }> = () => {
+const Overview: React.FC<{ businessData: any; onTabChange: (tab: any) => void }> = ({ businessData, onTabChange }) => {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -61,14 +62,18 @@ const Overview: React.FC<{ businessData: any }> = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Total Revenue', value: '$128,430', change: '+12.5%', icon: TrendingUp, color: 'text-[#0D47A1]', bg: 'bg-blue-50' },
-          { label: 'Active Clients', value: '1,240', change: '+5.2%', icon: Users, color: 'text-[#00B8D4]', bg: 'bg-cyan-50' },
-          { label: 'Pending Payouts', value: '$12,400', change: '-2.1%', icon: CreditCard, color: 'text-amber-500', bg: 'bg-amber-50' },
-          { label: 'Inventory Level', value: '94%', change: 'Normal', icon: Package, color: 'text-slate-500', bg: 'bg-slate-50' },
+          { id: 'revenue', label: 'Total Revenue', value: '$128,430', change: '+12.5%', icon: TrendingUp, color: 'text-[#0D47A1]', bg: 'bg-blue-50' },
+          { id: 'clients', label: 'Active Clients', value: '1,240', change: '+5.2%', icon: Users, color: 'text-[#00B8D4]', bg: 'bg-cyan-50' },
+          { id: 'payments', label: 'Pending Payouts', value: '$12,400', change: '-2.1%', icon: CreditCard, color: 'text-amber-500', bg: 'bg-amber-50' },
+          { id: 'inventory', label: 'Inventory Level', value: '94%', change: 'Normal', icon: Package, color: 'text-slate-500', bg: 'bg-slate-50' },
         ].map((stat, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          <div 
+            key={idx} 
+            onClick={() => stat.id === 'clients' && onTabChange('clients')}
+            className={`bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow ${stat.id === 'clients' ? 'cursor-pointer group/stat' : ''}`}
+          >
             <div className="flex items-center justify-between mb-4">
-              <div className={`p-2.5 rounded-xl ${stat.bg} ${stat.color}`}>
+              <div className={`p-2.5 rounded-xl ${stat.bg} ${stat.color} ${stat.id === 'clients' ? 'group-hover/stat:bg-cyan-100 transition-colors' : ''}`}>
                 <stat.icon className="w-5 h-5" />
               </div>
               <span className={`text-[10px] font-black px-2 py-1 rounded-lg ${stat.change.startsWith('+') ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
@@ -76,7 +81,10 @@ const Overview: React.FC<{ businessData: any }> = () => {
               </span>
             </div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{stat.label}</p>
-            <h3 className="text-2xl font-black text-slate-900 mt-1">{stat.value}</h3>
+            <h3 className="text-2xl font-black text-slate-900 mt-1 flex items-center justify-between">
+              {stat.value}
+              {stat.id === 'clients' && <ChevronRight className="w-4 h-4 text-slate-300 group-hover/stat:text-[#00B8D4] transition-colors" />}
+            </h3>
           </div>
         ))}
       </div>
@@ -283,6 +291,7 @@ const Dashboard: React.FC<DashboardProps> = ({ businessData, onLogout }) => {
             {[
               { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
               { id: 'products', label: 'Inventory', icon: Package },
+              { id: 'clients', label: 'Clients', icon: Users },
               { id: 'invoices', label: 'Invoices', icon: FileText },
               { id: 'business-setup', label: 'Setup', icon: Settings },
             ].map((tab) => (
@@ -310,8 +319,9 @@ const Dashboard: React.FC<DashboardProps> = ({ businessData, onLogout }) => {
 
       <main className="pt-28 pb-12 px-6 sm:px-10 max-w-7xl mx-auto">
         <AnimatePresence mode="wait">
-          {activeTab === 'dashboard' && <Overview key="overview" businessData={businessData} />}
+          {activeTab === 'dashboard' && <Overview key="overview" businessData={businessData} onTabChange={setActiveTab} />}
           {activeTab === 'products' && <Inventory key="products" businessId={businessData.id} />}
+          {activeTab === 'clients' && <Clients key="clients" />}
           {activeTab === 'business-setup' && <BusinessSetup key="setup" businessData={businessData} />}
           {activeTab === 'invoices' && (
             <motion.div 

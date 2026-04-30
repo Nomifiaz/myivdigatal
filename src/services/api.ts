@@ -99,3 +99,47 @@ export const authService = {
     localStorage.removeItem('auth_token');
   }
 };
+
+export const productService = {
+  async addProduct(product: any) {
+    const response = await fetch(`${API_BASE_URL}/add`, {
+      method: 'POST',
+      headers: authService.getHeaders(),
+      body: JSON.stringify(product),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to add product');
+    return data;
+  },
+
+  async getProducts(businessId: number) {
+    const response = await fetch(`${API_BASE_URL}/getProduct?businessId=${businessId}`, {
+      method: 'GET',
+      headers: authService.getHeaders(),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch products');
+    return data;
+  },
+
+  async updateProduct(id: number, updates: any) {
+    const response = await fetch(`${API_BASE_URL}/updateProducts?id=${id}`, {
+      method: 'PATCH',
+      headers: authService.getHeaders(),
+      body: JSON.stringify(updates),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to update product');
+    return data;
+  },
+
+  async deleteProduct(id: number) {
+    const response = await fetch(`${API_BASE_URL}/deleteProdcts?id=${id}`, {
+      method: 'DELETE',
+      headers: authService.getHeaders(),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to delete product');
+    return data;
+  }
+};

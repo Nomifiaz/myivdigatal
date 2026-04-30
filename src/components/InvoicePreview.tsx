@@ -204,8 +204,8 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
                             </div>
                             <div className="col-span-1 text-center">
                                 <p className="font-black text-slate-500 uppercase">GST</p>
-                                <p className="font-black text-blue-700">{item.gstPercent || item.gstRate}%</p>
-                                <p className="font-bold">{(item.gstAmt).toFixed(2)}</p>
+                                <p className="font-black text-blue-700">{item.gstPercent || item.gstRate || 0}%</p>
+                                <p className="font-bold">{(item.gstAmt || 0).toFixed(2)}</p>
                             </div>
                             <div className="col-span-1 text-center">
                                 <p className="font-black text-slate-500 uppercase">F.Tax</p>
@@ -224,7 +224,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
                             </div>
                             <div className="col-span-1 text-center">
                                 <p className="font-black text-emerald-600 uppercase">Total Tax</p>
-                                <p className="font-black text-emerald-700">{(item.totalTax).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                                <p className="font-black text-emerald-700">{(item.totalTax || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                             </div>
                             <div className="col-span-1 text-right">
                                 <p className="font-black text-blue-800 uppercase">Total + Tax</p>

@@ -112,8 +112,8 @@ export const productService = {
     return data;
   },
 
-  async getProducts(businessId: number) {
-    const response = await fetch(`${API_BASE_URL}/getProduct?businessId=${businessId}`, {
+  async getProducts() {
+    const response = await fetch(`${API_BASE_URL}/getProduct`, {
       method: 'GET',
       headers: authService.getHeaders(),
     });

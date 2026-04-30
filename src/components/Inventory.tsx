@@ -38,6 +38,11 @@ interface Product {
   sellPricePerUnitExclTax: number;
   gstRate: number;
   uom: string;
+  description: string;
+  isExempt: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface InventoryProps {
@@ -93,9 +98,15 @@ const Inventory: React.FC<InventoryProps> = ({ businessId }) => {
   const fetchProducts = async () => {
     try {
       setIsLoading(true);
-      const data = await productService.getProducts(businessId);
-      // Ensure data is an array
-      setProducts(Array.isArray(data) ? data : []);
+      const response = await productService.getProducts();
+      // Handle response structure { success: true, data: [...] }
+      if (response && response.success && Array.isArray(response.data)) {
+        setProducts(response.data);
+      } else if (Array.isArray(response)) {
+        setProducts(response);
+      } else {
+        setProducts([]);
+      }
     } catch (err: any) {
       setError(err.message);
       setProducts([]); // Fallback to empty array on error

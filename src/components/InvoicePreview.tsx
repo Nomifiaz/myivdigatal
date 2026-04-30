@@ -296,36 +296,59 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
       <style>{`
         @media print {
           @page {
-            size: A4;
+            size: A4 portrait;
             margin: 0;
           }
-          html, body {
-            height: 100%;
+          
+          /* Hide everything except the invoice container */
+          body * {
+            visibility: hidden !important;
+          }
+          
+          .invoice-preview-container, 
+          .invoice-preview-container #printable-invoice,
+          .invoice-preview-container #printable-invoice * {
+            visibility: visible !important;
+          }
+
+          .invoice-preview-container {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            height: auto !important;
             margin: 0 !important;
             padding: 0 !important;
-            background: #ffffff !important;
-            overflow: visible !important;
+            background: white !important;
+            visibility: visible !important;
+            display: block !important;
+            z-index: 9999 !important;
           }
-          .no-print {
+
+          /* Specifically hide UI components that shouldn't print */
+          .no-print, 
+          .no-print *,
+          button,
+          nav,
+          header {
             display: none !important;
+            visibility: hidden !important;
           }
-          #root > div:not(.invoice-preview-container) {
-            display: none !important;
-          }
+
           #printable-invoice {
-            position: absolute;
-            left: 0;
-            top: 0;
+            position: relative !important;
+            margin: 0 auto !important;
             width: 210mm !important;
             height: 297mm !important;
-            margin: 0 !important;
-            padding: 15mm !important;
+            padding: 20mm !important;
             box-shadow: none !important;
             border: none !important;
-            transform: none !important;
-            background: #ffffff !important;
-            color: #000000 !important;
+            background: white !important;
+            visibility: visible !important;
+            display: block !important;
           }
+
+          /* Keep colors in print */
           * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;

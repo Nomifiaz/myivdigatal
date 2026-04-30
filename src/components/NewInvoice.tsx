@@ -33,15 +33,31 @@ interface InvoiceItem {
   productName: string;
   hsCode: string;
   quantity: number;
-  price: number;
+  price: number; // Sale Price/Unit (Excl Tax)
+  costPrice: number; // Cost/Unit (Excl Tax)
   discount: number;
   uom: string;
   gstRate: number;
+  gstAmt: number;
+  ftRate: number;
+  ftAmt: number;
+  fedRate: number;
+  fedAmt: number;
+  extRate: number;
+  extAmt: number;
+  isExempt: boolean;
+  poNumber: string;
+  batchNumber: string;
+  batchExpiry: string;
+  biltiNo: string;
+  challanNo: string;
+  grNo: string;
+  gpNo: string;
+  lineNote: string;
+  saleType: string;
   totalTax: number;
+  taxableValue: number;
   totalInclTax: number;
-  poNumber?: string;
-  batchNumber?: string;
-  batchExpiry?: string;
 }
 
 const NewInvoice: React.FC<NewInvoiceProps> = ({ businessData, onBack, onSuccess }) => {
@@ -63,6 +79,8 @@ const NewInvoice: React.FC<NewInvoiceProps> = ({ businessData, onBack, onSuccess
     dueDate: '',
     clientPO: '',
     invoiceNote: '',
+    internalPO: '',
+    incomeTaxDescription: '',
     incomeTaxRate: 0,
     status: 'Draft'
   });
@@ -95,10 +113,29 @@ const NewInvoice: React.FC<NewInvoiceProps> = ({ businessData, onBack, onSuccess
       hsCode: '',
       quantity: 1,
       price: 0,
+      costPrice: 0,
       discount: 0,
       uom: '',
       gstRate: 18,
+      gstAmt: 0,
+      ftRate: 0,
+      ftAmt: 0,
+      fedRate: 0,
+      fedAmt: 0,
+      extRate: 0,
+      extAmt: 0,
+      isExempt: false,
+      poNumber: '',
+      batchNumber: '',
+      batchExpiry: '',
+      biltiNo: '',
+      challanNo: '',
+      grNo: '',
+      gpNo: '',
+      lineNote: '',
+      saleType: 'Goods at standard rate (default)',
       totalTax: 0,
+      taxableValue: 0,
       totalInclTax: 0
     };
     setItems([...items, newItem]);
@@ -112,20 +149,28 @@ const NewInvoice: React.FC<NewInvoiceProps> = ({ businessData, onBack, onSuccess
     const newItems = [...items];
     const item = { ...newItems[index], [field]: value };
 
-    // Calculate totals for the line item
     if (field === 'productId') {
       const product = products.find(p => p.id.toString() === value);
       if (product) {
         item.productName = product.productName;
         item.price = product.sellPricePerUnitExclTax;
+        item.costPrice = product.costPricePerUnitExclTax || 0;
         item.hsCode = product.hsCode;
         item.uom = product.uom;
         item.gstRate = product.gstRate || 18;
       }
     }
 
+    // Calculations
     const taxableValue = (item.price * item.quantity) - item.discount;
-    item.totalTax = (taxableValue * item.gstRate) / 100;
+    item.taxableValue = taxableValue;
+    
+    item.gstAmt = item.isExempt ? 0 : (taxableValue * item.gstRate) / 100;
+    item.ftAmt = (taxableValue * item.ftRate) / 100;
+    item.fedAmt = (taxableValue * item.fedRate) / 100;
+    item.extAmt = (taxableValue * item.extRate) / 100;
+
+    item.totalTax = item.gstAmt + item.ftAmt + item.fedAmt + item.extAmt;
     item.totalInclTax = taxableValue + item.totalTax;
 
     newItems[index] = item;
@@ -135,20 +180,23 @@ const NewInvoice: React.FC<NewInvoiceProps> = ({ businessData, onBack, onSuccess
   const calculateTotals = () => {
     const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const discount = items.reduce((sum, item) => sum + item.discount, 0);
-    const gstTotal = items.reduce((sum, item) => sum + item.totalTax, 0);
-    const incomeTax = ((subtotal - discount) * invoiceData.incomeTaxRate) / 100;
-    const grandTotal = (subtotal - discount) + gstTotal;
+    const gstTotal = items.reduce((sum, item) => sum + item.gstAmt, 0);
+    const otherTaxes = items.reduce((sum, item) => sum + item.ftAmt + item.fedAmt + item.extAmt, 0);
+    const taxableAmount = subtotal - discount;
+    const incomeTax = (taxableAmount * invoiceData.incomeTaxRate) / 100;
+    const grandTotal = taxableAmount + gstTotal + otherTaxes;
 
     return {
       subtotal,
       discount,
       gstTotal,
+      otherTaxes,
       incomeTax,
       grandTotal
     };
   };
 
-  const { subtotal, discount, gstTotal, incomeTax, grandTotal } = calculateTotals();
+  const { subtotal, discount, gstTotal, otherTaxes, incomeTax, grandTotal } = calculateTotals();
 
   const handleQuickClientSubmit = async () => {
     if (!quickClientData.name || !quickClientData.phone) return;
@@ -181,6 +229,29 @@ const NewInvoice: React.FC<NewInvoiceProps> = ({ businessData, onBack, onSuccess
     try {
       // Handle manual items: create products if they don't exist
       const processedItems = await Promise.all(items.map(async (item) => {
+        const itemBase = {
+          quantity: item.quantity,
+          price: item.price,
+          discount: item.discount,
+          gstRate: item.gstRate,
+          gstAmt: item.gstAmt,
+          ftRate: item.ftRate,
+          ftAmt: item.ftAmt,
+          fedRate: item.fedRate,
+          fedAmt: item.fedAmt,
+          extRate: item.extRate,
+          extAmt: item.extAmt,
+          poNumber: item.poNumber,
+          batchNumber: item.batchNumber,
+          batchExpiry: item.batchExpiry,
+          biltiNo: item.biltiNo,
+          challanNo: item.challanNo,
+          grNo: item.grNo,
+          gpNo: item.gpNo,
+          lineNote: item.lineNote,
+          saleType: item.saleType
+        };
+
         if (item.productId === 'manual') {
           const newProd = await productService.addProduct({
             businessId: businessData.id,
@@ -194,29 +265,25 @@ const NewInvoice: React.FC<NewInvoiceProps> = ({ businessData, onBack, onSuccess
           });
           return {
             productId: newProd.id || newProd.data?.id,
-            quantity: item.quantity,
-            price: item.price,
-            discount: item.discount,
-            poNumber: item.poNumber,
-            batchNumber: item.batchNumber,
-            batchExpiry: item.batchExpiry
+            ...itemBase
           };
         }
         return {
           productId: parseInt(item.productId),
-          quantity: item.quantity,
-          price: item.price,
-          discount: item.discount,
-          poNumber: item.poNumber,
-          batchNumber: item.batchNumber,
-          batchExpiry: item.batchExpiry
+          ...itemBase
         };
       }));
 
       const payload = {
         businessId: businessData.id,
         clientId: selectedClient.id,
+        invoiceType: 'Sale Invoice',
         ...invoiceData,
+        subtotal,
+        totalDiscount: discount,
+        totalGST: gstTotal,
+        totalOtherTaxes: otherTaxes,
+        grandTotal,
         status,
         items: processedItems
       };
@@ -363,42 +430,58 @@ const NewInvoice: React.FC<NewInvoiceProps> = ({ businessData, onBack, onSuccess
         </div>
 
         {/* Date & Reference */}
-        <div className="col-span-12 lg:col-span-5 bg-black h-full rounded-[32px] p-8 text-white shadow-xl">
+        <div className="col-span-12 lg:col-span-5 bg-white rounded-[32px] border border-slate-200 p-8 shadow-sm">
           <div className="flex items-center gap-2 mb-8">
-            <FileText className="w-5 h-5 text-slate-400" />
-            <h3 className="text-sm font-black uppercase tracking-widest">Metadata</h3>
+            <FileText className="w-5 h-5 text-[#0D47A1]" />
+            <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Invoice Details</h3>
           </div>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Invoice Date</label>
-              <div className="relative">
-                <input 
-                  type="date"
-                  value={invoiceData.invoiceDate}
-                  onChange={(e) => setInvoiceData({...invoiceData, invoiceDate: e.target.value})}
-                  className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold focus:bg-white/20 outline-none transition-all"
-                />
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Invoice Date</label>
+              <input 
+                type="date"
+                value={invoiceData.invoiceDate}
+                onChange={(e) => setInvoiceData({...invoiceData, invoiceDate: e.target.value})}
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1]"
+              />
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Due Date</label>
-              <div className="relative">
-                <input 
-                  type="date"
-                  value={invoiceData.dueDate}
-                  onChange={(e) => setInvoiceData({...invoiceData, dueDate: e.target.value})}
-                  className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold focus:bg-white/20 outline-none transition-all"
-                />
-              </div>
+            <div className="space-y-1.5">
+              <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Due Date</label>
+              <input 
+                type="date"
+                value={invoiceData.dueDate}
+                onChange={(e) => setInvoiceData({...invoiceData, dueDate: e.target.value})}
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1]"
+              />
             </div>
-            <div className="col-span-2 space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Client Purchase Order (PO)</label>
+            <div className="space-y-1.5">
+              <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">Today Client PO# <Info className="w-2.5 h-2.5 opacity-30" /></label>
               <input 
                 type="text"
                 value={invoiceData.clientPO}
                 onChange={(e) => setInvoiceData({...invoiceData, clientPO: e.target.value})}
-                placeholder="PO-9988-ABC"
-                className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold focus:bg-white/20 outline-none transition-all"
+                placeholder="Optional"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1]"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">Invoice Note <Info className="w-2.5 h-2.5 opacity-30" /></label>
+              <input 
+                type="text"
+                value={invoiceData.invoiceNote}
+                onChange={(e) => setInvoiceData({...invoiceData, invoiceNote: e.target.value})}
+                placeholder="Optional"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1]"
+              />
+            </div>
+            <div className="col-span-2 space-y-1.5">
+              <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">Internal PO# <Info className="w-2.5 h-2.5 opacity-30" /></label>
+              <input 
+                type="text"
+                value={invoiceData.internalPO}
+                onChange={(e) => setInvoiceData({...invoiceData, internalPO: e.target.value})}
+                placeholder="Optional"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1]"
               />
             </div>
           </div>
@@ -426,232 +509,354 @@ const NewInvoice: React.FC<NewInvoiceProps> = ({ businessData, onBack, onSuccess
           </button>
         </div>
 
-        <div className="p-8 space-y-6">
+        <div className="p-4 space-y-4">
           {items.map((item, idx) => (
             <motion.div 
               key={idx}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="group relative grid grid-cols-12 gap-4 p-6 bg-slate-50 rounded-[24px] border border-slate-200 hover:border-[#0D47A1] hover:bg-white transition-all shadow-sm hover:shadow-md"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="group relative bg-[#f8fafc] rounded-[24px] border border-slate-200 p-6 overflow-hidden hover:bg-white transition-all"
             >
               <button 
                 onClick={() => removeItem(idx)}
-                className="absolute -right-3 -top-3 w-8 h-8 bg-red-500 text-white rounded-xl flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute right-4 top-4 w-8 h-8 bg-white border border-slate-200 text-slate-400 rounded-lg flex items-center justify-center hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all z-10"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
 
-              <div className="col-span-12 md:col-span-5 space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Product Description</label>
-                  <button 
-                    onClick={() => {
-                      const isManual = item.productId === 'manual';
-                      updateItem(idx, 'productId', isManual ? '' : 'manual');
-                    }}
-                    className="text-[8px] font-black text-[#0D47A1] uppercase tracking-widest hover:underline"
-                  >
-                    {item.productId === 'manual' ? 'Select from Stock' : 'Manual Entry'}
-                  </button>
+              {/* Row 1: Key Fields */}
+              <div className="grid grid-cols-12 gap-4 mb-6">
+                <div className="col-span-3 space-y-1.5">
+                   <div className="flex items-center gap-1">
+                      <label className="text-[8px] font-black text-red-400 uppercase tracking-[0.1em]">Sale Type *</label>
+                      <Info className="w-2.5 h-2.5 text-slate-300" />
+                   </div>
+                   <select 
+                     value={item.saleType}
+                     onChange={(e) => updateItem(idx, 'saleType', e.target.value)}
+                     className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1]"
+                   >
+                     <option>Goods at standard rate (default)</option>
+                     <option>Zero Rated</option>
+                     <option>Exempt</option>
+                   </select>
                 </div>
-                <div className="relative">
-                  {item.productId === 'manual' ? (
-                    <input 
-                      type="text"
-                      value={item.productName}
-                      onChange={(e) => updateItem(idx, 'productName', e.target.value)}
-                      placeholder="Enter custom product name..."
-                      className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-[#0D47A1]"
-                    />
-                  ) : (
-                    <select 
-                      value={item.productId}
-                      onChange={(e) => updateItem(idx, 'productId', e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-[#0D47A1]"
-                    >
-                      <option value="">Select a product...</option>
-                      {products.map(p => <option key={p.id} value={p.id}>{p.productName} ({p.sku})</option>)}
-                    </select>
-                  )}
+
+                <div className="col-span-5 space-y-1.5">
+                   <div className="flex items-center justify-between">
+                      <label className="text-[8px] font-black text-emerald-400 uppercase tracking-[0.1em]">Product Description *</label>
+                      <button 
+                        onClick={() => updateItem(idx, 'productId', item.productId === 'manual' ? '' : 'manual')}
+                        className="text-[8px] font-black text-[#0D47A1] uppercase tracking-widest leading-none hover:underline"
+                      >
+                        {item.productId === 'manual' ? 'Stock List' : 'Manual Entry'}
+                      </button>
+                   </div>
+                   {item.productId === 'manual' ? (
+                     <input 
+                       type="text"
+                       value={item.productName}
+                       onChange={(e) => updateItem(idx, 'productName', e.target.value)}
+                       placeholder="Type to search stock items..."
+                       className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1]"
+                     />
+                   ) : (
+                     <select 
+                       value={item.productId}
+                       onChange={(e) => updateItem(idx, 'productId', e.target.value)}
+                       className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1]"
+                     >
+                       <option value="">Select a product...</option>
+                       {products.map(p => <option key={p.id} value={p.id}>{p.productName}</option>)}
+                     </select>
+                   )}
+                </div>
+
+                <div className="col-span-2 space-y-1.5 font-mono">
+                   <div className="flex items-center gap-1">
+                      <label className="text-[8px] font-black text-slate-400 uppercase tracking-[0.1em]">HS Code</label>
+                      <Search className="w-2.5 h-2.5 text-slate-300" />
+                   </div>
+                   <input 
+                     type="text"
+                     value={item.hsCode}
+                     onChange={(e) => updateItem(idx, 'hsCode', e.target.value)}
+                     className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1]"
+                   />
+                </div>
+
+                <div className="col-span-2 space-y-1.5 flex items-end gap-2">
+                   <div className="flex-1 space-y-1.5">
+                      <label className="text-[8px] font-black text-slate-400 uppercase tracking-[0.1em]">UOM</label>
+                      <input 
+                        type="text"
+                        value={item.uom}
+                        onChange={(e) => updateItem(idx, 'uom', e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1]"
+                      />
+                   </div>
+                   <button className="p-2 bg-slate-100 rounded-lg text-slate-400 hover:text-slate-900">
+                      <Download className="w-3.5 h-3.5" />
+                   </button>
                 </div>
               </div>
 
-              <div className="col-span-6 md:col-span-2 space-y-2">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Quantity</label>
-                <input 
-                  type="number"
-                  value={item.quantity}
-                  onChange={(e) => updateItem(idx, 'quantity', parseFloat(e.target.value))}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-[#0D47A1]"
-                />
+              {/* Row 2: Quantities & Prices */}
+              <div className="grid grid-cols-12 gap-4 mb-6">
+                <div className="col-span-1.5 space-y-1.5">
+                   <label className="text-[8px] font-black text-red-500 uppercase tracking-[0.1em]">FBR QTY (PCS) *</label>
+                   <input 
+                     type="number"
+                     value={item.quantity}
+                     onChange={(e) => updateItem(idx, 'quantity', parseFloat(e.target.value))}
+                     className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1]"
+                   />
+                </div>
+                <div className="col-span-2.5 space-y-1.5">
+                   <label className="text-[8px] font-black text-slate-400 uppercase tracking-[0.1em]">Cost/Unit (Excl Tax)</label>
+                   <input 
+                     type="number"
+                     value={item.costPrice}
+                     onChange={(e) => updateItem(idx, 'costPrice', parseFloat(e.target.value))}
+                     className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1]"
+                   />
+                </div>
+                <div className="col-span-2.5 space-y-1.5">
+                   <label className="text-[8px] font-black text-red-400 uppercase tracking-[0.1em]">Sale Price/Unit (Excl Tax) *</label>
+                   <input 
+                     type="number"
+                     value={item.price}
+                     onChange={(e) => updateItem(idx, 'price', parseFloat(e.target.value))}
+                     className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1]"
+                   />
+                </div>
+                <div className="col-span-2.5 space-y-1.5">
+                   <label className="text-[8px] font-black text-pink-400 uppercase tracking-[0.1em]">Discount</label>
+                   <input 
+                     type="number"
+                     value={item.discount}
+                     onChange={(e) => updateItem(idx, 'discount', parseFloat(e.target.value))}
+                     className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1]"
+                   />
+                </div>
+                <div className="col-span-3 space-y-1.5">
+                   <label className="text-[8px] font-black text-amber-500 uppercase tracking-[0.1em] block text-right">Taxable Value</label>
+                   <div className="w-full bg-amber-50 border border-amber-100 rounded-lg px-4 py-2 text-right">
+                      <span className="text-xs font-black text-amber-700">Rs {item.taxableValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                   </div>
+                </div>
               </div>
 
-              <div className="col-span-6 md:col-span-2 space-y-2">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Price (Excl. Tax)</label>
-                <input 
-                  type="number"
-                  value={item.price}
-                  onChange={(e) => updateItem(idx, 'price', parseFloat(e.target.value))}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-[#0D47A1]"
-                />
+              {/* Row 3: Complex Tax Grid */}
+              <div className="grid grid-cols-12 gap-2 mb-6">
+                <div className="col-span-2 space-y-1.5">
+                   <label className="text-[8px] font-black text-emerald-400 uppercase">Rate</label>
+                   <select 
+                     value={item.gstRate}
+                     onChange={(e) => updateItem(idx, 'gstRate', parseFloat(e.target.value))}
+                     className="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-[10px] font-bold"
+                   >
+                      <option value={18}>Select sale type</option>
+                      <option value={18}>Standard 18%</option>
+                      <option value={10}>Reduced 10%</option>
+                      <option value={0}>Exempt 0%</option>
+                   </select>
+                </div>
+                <div className="col-span-1 flex flex-col items-center justify-center pt-4">
+                   <label className="text-[8px] font-black text-slate-400 uppercase mb-1">EXMT</label>
+                   <input 
+                     type="checkbox"
+                     checked={item.isExempt}
+                     onChange={(e) => updateItem(idx, 'isExempt', e.target.checked)}
+                     className="w-4 h-4 rounded border-slate-300"
+                   />
+                </div>
+                <div className="col-span-2 space-y-1.5">
+                   <label className="text-[8px] font-black text-emerald-400 uppercase">GST AMT</label>
+                   <div className="bg-emerald-50 border border-emerald-100 rounded-lg px-2 py-2 text-[10px] font-bold text-center text-emerald-700">
+                      {item.gstAmt.toFixed(2)}
+                   </div>
+                </div>
+                <div className="col-span-1 space-y-1.5">
+                   <label className="text-[8px] font-black text-amber-400 uppercase">FT %</label>
+                   <input type="number" value={item.ftRate} onChange={(e) => updateItem(idx, 'ftRate', parseFloat(e.target.value))} className="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-[10px] font-bold"/>
+                </div>
+                <div className="col-span-1 space-y-1.5">
+                   <label className="text-[8px] font-black text-amber-400 uppercase">FT AMT</label>
+                   <div className="bg-amber-50 border border-amber-100 rounded-lg px-2 py-2 text-[10px] font-bold text-center text-amber-700">
+                      {item.ftAmt.toFixed(2)}
+                   </div>
+                </div>
+                <div className="col-span-1 space-y-1.5">
+                   <label className="text-[8px] font-black text-blue-400 uppercase">FED %</label>
+                   <input type="number" value={item.fedRate} onChange={(e) => updateItem(idx, 'fedRate', parseFloat(e.target.value))} className="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-[10px] font-bold"/>
+                </div>
+                <div className="col-span-1 space-y-1.5">
+                   <label className="text-[8px] font-black text-blue-400 uppercase">FED AMT</label>
+                   <div className="bg-blue-50 border border-blue-100 rounded-lg px-2 py-2 text-[10px] font-bold text-center text-blue-700">
+                      {item.fedAmt.toFixed(2)}
+                   </div>
+                </div>
+                <div className="col-span-1.5 space-y-1.5">
+                   <label className="text-[8px] font-black text-pink-400 uppercase">Total Tax</label>
+                   <div className="bg-pink-50 border border-pink-100 rounded-lg px-2 py-2 text-[10px] font-black text-center text-pink-600">
+                      {item.totalTax.toFixed(2)}
+                   </div>
+                </div>
               </div>
 
-              <div className="col-span-6 md:col-span-2 space-y-2">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Discount</label>
-                <input 
-                  type="number"
-                  value={item.discount}
-                  onChange={(e) => updateItem(idx, 'discount', parseFloat(e.target.value))}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-[#0D47A1]"
-                />
-              </div>
-
-              <div className="col-span-6 md:col-span-1 space-y-2">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">GST %</label>
-                <select 
-                  value={item.gstRate}
-                  onChange={(e) => updateItem(idx, 'gstRate', parseFloat(e.target.value))}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-2 py-3 text-sm font-bold outline-none focus:border-[#0D47A1]"
-                >
-                  <option value={0}>0%</option>
-                  <option value={10}>10%</option>
-                  <option value={18}>18%</option>
-                  <option value={25}>25%</option>
-                </select>
-              </div>
-
-              <div className="md:col-span-12 border-t border-slate-100 mt-4 pt-4 flex items-center justify-between">
-                <div className="flex gap-4">
-                  <div className="space-y-1">
-                    <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">PO#</label>
-                    <input 
-                      type="text"
-                      value={item.poNumber || ''}
-                      onChange={(e) => updateItem(idx, 'poNumber', e.target.value)}
-                      placeholder="PO#"
-                      className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1] w-24"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Batch#</label>
-                    <input 
-                      type="text"
-                      value={item.batchNumber || ''}
-                      onChange={(e) => updateItem(idx, 'batchNumber', e.target.value)}
-                      placeholder="Batch#"
-                      className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1] w-24"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Expiry</label>
+              {/* Row 4: Shipping & Metadata */}
+              <div className="grid grid-cols-9 gap-2 mb-6">
+                 {[
+                   { label: 'PO#', key: 'poNumber' },
+                   { label: 'Bilti#', key: 'biltiNo' },
+                   { label: 'D. Challan#', key: 'challanNo' },
+                   { label: 'G.R#', key: 'grNo' },
+                   { label: 'G.P#', key: 'gpNo' },
+                   { label: 'Note', key: 'lineNote' },
+                   { label: 'Batch#', key: 'batchNumber' },
+                 ].map(field => (
+                   <div key={field.key} className="space-y-1">
+                      <label className="text-[7px] font-black text-slate-400 uppercase">{field.label}</label>
+                      <input 
+                        type="text"
+                        value={(item as any)[field.key]}
+                        onChange={(e) => updateItem(idx, field.key as any, e.target.value)}
+                        placeholder={field.label}
+                        className="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-[9px] font-bold"
+                      />
+                   </div>
+                 ))}
+                 <div className="col-span-2 space-y-1">
+                    <label className="text-[7px] font-black text-slate-400 uppercase">Batch Expiry</label>
                     <input 
                       type="date"
-                      value={item.batchExpiry || ''}
+                      value={item.batchExpiry}
                       onChange={(e) => updateItem(idx, 'batchExpiry', e.target.value)}
-                      className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-[#0D47A1]"
+                      className="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-[9px] font-bold"
                     />
-                  </div>
-                </div>
-                <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2 text-right">
-                  <span className="text-[8px] font-black text-emerald-400 uppercase block tracking-widest mb-0.5">Value Incl. Tax</span>
-                  <p className="text-sm font-black text-emerald-700">Rs {item.totalInclTax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                </div>
+                 </div>
+              </div>
+
+              {/* Row 5: Action SROs & Final Total */}
+              <div className="bg-[#0f4c3a] -mx-6 -mb-6 px-6 py-3 flex items-center justify-between">
+                 <div className="flex gap-2">
+                    <button className="bg-[#146e54] text-white/70 px-3 py-1.5 rounded-md text-[8px] font-black uppercase flex items-center gap-1.5 hover:text-white transition-colors">
+                       <span className="text-emerald-400">SRO</span>
+                       Select rate first
+                    </button>
+                    <button className="bg-[#146e54] text-white/70 px-3 py-1.5 rounded-md text-[8px] font-black uppercase flex items-center gap-1.5 hover:text-white transition-colors">
+                       <span className="text-emerald-400">SR#</span>
+                       Select SRO first
+                    </button>
+                 </div>
+                 <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">Value Incl. Tax</span>
+                    <span className="text-lg font-black text-white">Rs {item.totalInclTax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                 </div>
               </div>
             </motion.div>
           ))}
-
-          {items.length === 0 && (
-            <div className="py-20 flex flex-col items-center justify-center text-center opacity-50">
-              <Package className="w-12 h-12 text-slate-300 mb-4" />
-              <p className="text-sm font-bold text-slate-400">Inventory items will appear here.</p>
-              <button 
-                onClick={addItem}
-                className="mt-4 text-[#0D47A1] text-xs font-black uppercase tracking-widest hover:underline"
-              >
-                Add Your First Row
-              </button>
+          
+          <button 
+            onClick={addItem}
+            className="w-full py-4 border-2 border-dashed border-emerald-100 rounded-[24px] flex items-center justify-center gap-2 text-emerald-600 font-black text-xs uppercase tracking-widest hover:bg-emerald-50 transition-all group"
+          >
+            <div className="p-1 bg-emerald-100 rounded-full group-hover:bg-emerald-200">
+               <Plus className="w-3 h-3" />
             </div>
-          )}
+            Add another item to this invoice
+          </button>
         </div>
       </div>
 
-      {/* Footer Summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pb-12">
-        <div className="lg:col-span-7 bg-white rounded-[32px] border border-slate-200 p-8 shadow-sm h-full">
-           <div className="flex items-center gap-2 mb-6">
-            <Calculator className="w-5 h-5 text-[#0D47A1]" />
-            <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Calculations & Notes</h3>
-          </div>
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Income Tax Rate (%)</label>
-                <input 
-                  type="number"
-                  value={invoiceData.incomeTaxRate}
-                  onChange={(e) => setInvoiceData({...invoiceData, incomeTaxRate: parseFloat(e.target.value)})}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:bg-white focus:border-[#0D47A1] outline-none"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Income Tax Amount</label>
-                <div className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-sm font-black text-slate-500">
-                  PKR {incomeTax.toLocaleString()}
-                </div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Customer Note / Special Instructions</label>
-              <textarea 
-                value={invoiceData.invoiceNote}
-                onChange={(e) => setInvoiceData({...invoiceData, invoiceNote: e.target.value})}
-                placeholder="Ex: Please deliver before 5 PM at Gate 2..."
-                rows={3}
-                className="w-full bg-slate-50 border border-slate-200 rounded-[24px] px-6 py-4 text-sm font-medium focus:bg-white focus:border-[#0D47A1] outline-none transition-all resize-none"
-              />
-            </div>
-          </div>
+      {/* Income Tax Section */}
+      <div className="bg-white rounded-[32px] border border-slate-200 p-8 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+           <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Income Tax</h3>
+           <div className="text-right">
+              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Total Value Incl. Tax</p>
+              <p className="text-sm font-black text-slate-900">Rs {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+           </div>
         </div>
+        <div className="grid grid-cols-12 gap-4">
+           <div className="col-span-12 md:col-span-5 space-y-1.5">
+              <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Description</label>
+              <input 
+                type="text" 
+                value={invoiceData.incomeTaxDescription}
+                onChange={(e) => setInvoiceData({...invoiceData, incomeTaxDescription: e.target.value})}
+                placeholder="e.g., Income Tax u/s 153" 
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-3 text-[10px] font-bold outline-none"
+              />
+           </div>
+           <div className="col-span-6 md:col-span-3 space-y-1.5">
+              <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Tax Rate (%)</label>
+              <input 
+                type="number" 
+                value={invoiceData.incomeTaxRate}
+                onChange={(e) => setInvoiceData({...invoiceData, incomeTaxRate: parseFloat(e.target.value) || 0})}
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-3 text-[10px] font-bold outline-none text-center"
+              />
+           </div>
+           <div className="col-span-6 md:col-span-4 space-y-1.5">
+              <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Income Tax Amount</label>
+              <div className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-3 text-[10px] font-black text-slate-500 text-right">
+                 Rs {incomeTax.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              </div>
+           </div>
+        </div>
+      </div>
 
-        <div className="lg:col-span-12">
-          <div className="bg-[#0f172a] rounded-[40px] p-2 flex flex-col md:flex-row items-stretch gap-2 shadow-2xl">
-            <div className="flex-1 bg-white rounded-[32px] p-6 flex flex-col justify-center">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Subtotal</p>
-              <h3 className="text-xl font-black text-slate-900 leading-none">Rs {subtotal.toLocaleString()}</h3>
+      {/* Notes Section */}
+      <div className="bg-white rounded-[32px] border border-slate-200 p-8 shadow-sm">
+        <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none block mb-4">Notes</label>
+        <textarea 
+          value={invoiceData.invoiceNote}
+          onChange={(e) => setInvoiceData({...invoiceData, invoiceNote: e.target.value})}
+          placeholder="Additional notes..."
+          rows={3}
+          className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none"
+        />
+      </div>
+
+      {/* Invoice Summary */}
+      <div className="bg-[#0f172a] rounded-[40px] p-8 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
+        <h3 className="text-white text-sm font-black uppercase tracking-[0.2em] mb-8">Invoice Summary</h3>
+        
+        <div className="grid grid-cols-5 gap-4">
+            <div className="bg-white rounded-[24px] p-6">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Subtotal</p>
+              <p className="text-lg font-black text-slate-900 leading-none">Rs {subtotal.toLocaleString()}</p>
             </div>
-            <div className="flex-1 bg-pink-50 rounded-[32px] p-6 flex flex-col justify-center">
-              <p className="text-[10px] font-black text-pink-400 uppercase tracking-widest mb-1">Discount</p>
-              <h3 className="text-xl font-black text-pink-600 leading-none">Rs {discount.toLocaleString()}</h3>
+            <div className="bg-pink-50 rounded-[24px] p-6">
+              <p className="text-[9px] font-black text-pink-400 uppercase tracking-widest mb-1">Discount</p>
+              <p className="text-lg font-black text-pink-600 leading-none">Rs {discount.toLocaleString()}</p>
             </div>
-            <div className="flex-1 bg-emerald-50 rounded-[32px] p-6 flex flex-col justify-center">
-              <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">GST</p>
-              <h3 className="text-xl font-black text-emerald-600 leading-none">Rs {gstTotal.toLocaleString()}</h3>
+            <div className="bg-emerald-50 rounded-[24px] p-6">
+              <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1">GST</p>
+              <p className="text-lg font-black text-emerald-600 leading-none">Rs {gstTotal.toLocaleString()}</p>
             </div>
-            <div className="flex-1 bg-amber-50 rounded-[32px] p-6 flex flex-col justify-center">
-              <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1">Other Taxes</p>
-              <h3 className="text-xl font-black text-amber-600 leading-none">Rs {incomeTax.toLocaleString()}</h3>
+            <div className="bg-amber-50 rounded-[24px] p-6">
+              <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1">Other Taxes</p>
+              <p className="text-lg font-black text-amber-600 leading-none">Rs {otherTaxes.toLocaleString()}</p>
             </div>
-            <div className="flex-[1.5] bg-[#004D40] rounded-[32px] p-6 flex items-center justify-between group cursor-pointer hover:bg-[#003d33] transition-colors">
-              <div>
-                <p className="text-[10px] font-black text-emerald-300 uppercase tracking-widest mb-1">Grand Total</p>
-                <h3 className="text-2xl font-black text-white leading-none">Rs {grandTotal.toLocaleString()}</h3>
-              </div>
-              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white">
-                <Calculator className="w-6 h-6" />
-              </div>
+            <div className="bg-[#004D40] rounded-[24px] p-6 flex flex-col justify-center border border-emerald-400/20">
+              <p className="text-[9px] font-black text-emerald-300 uppercase tracking-widest mb-1">Grand Total</p>
+              <p className="text-2xl font-black text-white leading-none">Rs {grandTotal.toLocaleString()}</p>
             </div>
-          </div>
         </div>
       </div>
 
       <div className="sticky bottom-6 left-0 right-0 z-50 flex justify-center">
-        <div className="bg-[#004D40] px-8 py-4 rounded-full shadow-2xl flex items-center gap-12 text-white border border-white/10">
+        <div className="bg-[#004D40] px-8 py-4 rounded-full shadow-2xl flex items-center gap-12 text-white border border-white/10 backdrop-blur-md">
             <div className="flex items-center gap-3">
-                <span className="text-[10px] font-black uppercase text-emerald-300 tracking-widest">Grand Total</span>
+                <span className="text-[9px] font-black uppercase text-emerald-300 tracking-widest">Grand Total</span>
                 <span className="text-xl font-black">Rs {grandTotal.toLocaleString()}</span>
             </div>
             <button 
-                onClick={() => handleSubmit('Paid')}
+                onClick={() => handleSubmit('Draft')}
                 disabled={isSubmitting}
                 className="bg-[#FF9800] text-white px-8 py-3 rounded-full font-black text-xs uppercase tracking-widest hover:bg-[#F57C00] transition-colors active:scale-95 disabled:opacity-50 flex items-center gap-2"
             >

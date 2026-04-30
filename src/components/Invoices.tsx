@@ -35,7 +35,9 @@ const Invoices: React.FC<{ businessData: any }> = ({ businessData }) => {
     try {
       setIsLoading(true);
       const response = await invoiceService.getInvoices();
-      if (response && response.success && Array.isArray(response.data)) {
+      if (response && response.success && Array.isArray(response.invoices)) {
+        setInvoices(response.invoices);
+      } else if (response && response.success && Array.isArray(response.data)) {
         setInvoices(response.data);
       } else if (Array.isArray(response)) {
         setInvoices(response);
@@ -151,7 +153,7 @@ const Invoices: React.FC<{ businessData: any }> = ({ businessData }) => {
                             {inv.status}
                           </span>
                         </div>
-                        <h3 className="text-lg font-black text-slate-900 leading-none">{inv.clientName || 'Direct Sale'}</h3>
+                        <h3 className="text-lg font-black text-slate-900 leading-none">{inv.Client?.name || inv.clientName || 'Direct Sale'}</h3>
                     </div>
                  </div>
 
@@ -171,7 +173,7 @@ const Invoices: React.FC<{ businessData: any }> = ({ businessData }) => {
                         </div>
                         <div>
                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Settlement</p>
-                            <p className="text-sm font-black text-slate-900">Rs {inv.totalInclTax || inv.grandTotal || '0'}</p>
+                            <p className="text-sm font-black text-slate-900">Rs {inv.grandTotal?.toLocaleString() || inv.totalInclTax?.toLocaleString() || '0'}</p>
                         </div>
                     </div>
                     <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all">

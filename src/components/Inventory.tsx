@@ -300,7 +300,7 @@ const Inventory: React.FC<InventoryProps> = ({ businessId }) => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-6xl bg-white rounded-[40px] shadow-2xl overflow-hidden flex flex-col"
+              className="relative w-full max-w-6xl max-h-[calc(100vh-4rem)] bg-white rounded-[40px] shadow-2xl overflow-hidden flex flex-col"
             >
               {/* Modal Header */}
               <div className="p-8 border-b border-slate-100 flex items-center justify-between">

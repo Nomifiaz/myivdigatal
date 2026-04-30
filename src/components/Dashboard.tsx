@@ -26,6 +26,7 @@ import {
 import { Logo } from './Brand';
 import Inventory from './Inventory';
 import Clients from './Clients';
+import Invoices from './Invoices';
 import { authService } from '../services/api';
 
 interface DashboardProps {
@@ -323,25 +324,7 @@ const Dashboard: React.FC<DashboardProps> = ({ businessData, onLogout }) => {
           {activeTab === 'products' && <Inventory key="products" businessId={businessData.id} />}
           {activeTab === 'clients' && <Clients key="clients" />}
           {activeTab === 'business-setup' && <BusinessSetup key="setup" businessData={businessData} />}
-          {activeTab === 'invoices' && (
-            <motion.div 
-               key="invoices"
-               initial={{ opacity: 0, y: 20 }}
-               animate={{ opacity: 1, y: 0 }}
-               exit={{ opacity: 0, y: -20 }}
-               className="flex flex-col items-center justify-center py-24 bg-white rounded-[40px] border border-slate-200"
-            >
-              <FileText className="w-16 h-16 text-slate-200 mb-6" />
-              <h3 className="text-xl font-bold text-slate-900">Invoices Module</h3>
-              <p className="text-slate-500 mt-2">The invoicing system is currently under development.</p>
-              <button 
-                onClick={() => setActiveTab('dashboard')}
-                className="mt-8 text-slate-900 font-bold hover:underline"
-              >
-                Back to Dashboard
-              </button>
-            </motion.div>
-          )}
+          {activeTab === 'invoices' && <Invoices key="invoices" businessData={businessData} />}
         </AnimatePresence>
       </main>
     </div>

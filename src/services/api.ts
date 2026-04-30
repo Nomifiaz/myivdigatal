@@ -187,3 +187,26 @@ export const clientService = {
     return data;
   }
 };
+
+export const invoiceService = {
+  async createInvoice(invoice: any) {
+    const response = await fetch(`${API_BASE_URL}/invoice`, {
+      method: 'POST',
+      headers: authService.getHeaders(),
+      body: JSON.stringify(invoice),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to create invoice');
+    return data;
+  },
+
+  async getInvoices() {
+    const response = await fetch(`${API_BASE_URL}/invoice`, {
+      method: 'GET',
+      headers: authService.getHeaders(),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch invoices');
+    return data;
+  }
+};

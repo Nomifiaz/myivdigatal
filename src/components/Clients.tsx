@@ -149,7 +149,7 @@ const Clients: React.FC = () => {
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-[#0D47A1] text-white px-5 py-2.5 rounded-xl text-sm font-black shadow-lg shadow-blue-900/20 hover:bg-blue-800 transition-all active:scale-95"
+            className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-black shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-all active:scale-95"
           >
             <Plus className="w-5 h-5" />
             Add Partner
@@ -159,19 +159,19 @@ const Clients: React.FC = () => {
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <Loader2 className="w-10 h-10 text-[#0D47A1] animate-spin" />
+          <Loader2 className="w-10 h-10 text-slate-900 animate-spin" />
           <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">Loading Directory...</p>
         </div>
       ) : filteredClients.length === 0 ? (
         <div className="bg-white rounded-[32px] border border-slate-200 p-20 flex flex-col items-center text-center">
-          <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center text-blue-200 mb-6">
+          <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-200 mb-6">
             <Users className="w-10 h-10" />
           </div>
           <h3 className="text-xl font-bold text-slate-900">No Partners Found</h3>
           <p className="text-slate-500 mt-2 max-w-sm">Connect with your customers by adding their profiles and financial details.</p>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="mt-8 flex items-center gap-2 text-[#0D47A1] font-black text-sm hover:underline"
+            className="mt-8 flex items-center gap-2 text-slate-900 font-black text-sm hover:underline"
           >
             <Plus className="w-4 h-4" />
             Register Your First Client
@@ -243,7 +243,7 @@ const Clients: React.FC = () => {
                     </td>
                     <td className="px-8 py-5">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 text-slate-400 hover:text-[#0D47A1] transition-colors">
+                        <button className="p-2 text-slate-400 hover:text-slate-900 transition-colors">
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button 
@@ -282,7 +282,7 @@ const Clients: React.FC = () => {
               {/* Modal Header */}
               <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div className="flex items-center gap-4">
-                   <div className="w-12 h-12 bg-[#0D47A1] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-900/20">
+                   <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-slate-900/20">
                     <Users className="w-6 h-6" />
                   </div>
                   <div>
@@ -311,7 +311,7 @@ const Clients: React.FC = () => {
                   {/* Basic Identity */}
                   <section className="space-y-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-1 h-4 bg-[#0D47A1] rounded-full" />
+                      <div className="w-1 h-4 bg-slate-900 rounded-full" />
                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Partner Identity</h4>
                     </div>
                     
@@ -325,7 +325,7 @@ const Clients: React.FC = () => {
                             value={formData.name}
                             onChange={(e) => setFormData({...formData, name: e.target.value})}
                             placeholder="Enter business or person name"
-                            className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm text-slate-900 focus:bg-white focus:border-[#0D47A1] outline-none transition-all pr-12"
+                            className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm text-slate-900 focus:bg-white focus:border-slate-900 outline-none transition-all pr-12"
                           />
                           <Briefcase className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                         </div>
@@ -337,7 +337,7 @@ const Clients: React.FC = () => {
                           <select 
                              value={formData.type}
                              onChange={(e) => setFormData({...formData, type: e.target.value})}
-                             className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm text-slate-900 appearance-none focus:bg-white focus:border-[#0D47A1] outline-none transition-all cursor-pointer"
+                             className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm text-slate-900 appearance-none focus:bg-white focus:border-slate-900 outline-none transition-all cursor-pointer"
                           >
                             {clientTypes.map(t => <option key={t} value={t}>{t}</option>)}
                           </select>
@@ -352,7 +352,7 @@ const Clients: React.FC = () => {
                           value={formData.cnic}
                           onChange={(e) => setFormData({...formData, cnic: e.target.value})}
                           placeholder="42101-XXXXXXX-X"
-                          className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-sm font-bold text-slate-900 focus:bg-white focus:border-[#0D47A1] outline-none"
+                          className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-sm font-bold text-slate-900 focus:bg-white focus:border-slate-900 outline-none"
                         />
                       </div>
 
@@ -363,7 +363,7 @@ const Clients: React.FC = () => {
                           value={formData.ntn}
                           onChange={(e) => setFormData({...formData, ntn: e.target.value})}
                           placeholder="1234567-0"
-                          className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-sm font-bold text-slate-900 focus:bg-white focus:border-[#0D47A1] outline-none"
+                          className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-sm font-bold text-slate-900 focus:bg-white focus:border-slate-900 outline-none"
                         />
                       </div>
                     </div>
@@ -372,7 +372,7 @@ const Clients: React.FC = () => {
                   {/* Reachability */}
                   <section className="space-y-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-1 h-4 bg-[#0D47A1] rounded-full" />
+                      <div className="w-1 h-4 bg-slate-900 rounded-full" />
                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Contact & Location</h4>
                     </div>
 
@@ -386,7 +386,7 @@ const Clients: React.FC = () => {
                             value={formData.phone}
                             onChange={(e) => setFormData({...formData, phone: e.target.value})}
                             placeholder="03XX-XXXXXXX"
-                            className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm text-slate-900 focus:bg-white focus:border-[#0D47A1] outline-none pr-12"
+                            className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm text-slate-900 focus:bg-white focus:border-slate-900 outline-none pr-12"
                           />
                           <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                         </div>
@@ -400,7 +400,7 @@ const Clients: React.FC = () => {
                             value={formData.email}
                             onChange={(e) => setFormData({...formData, email: e.target.value})}
                             placeholder="customer@domain.com"
-                            className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm text-slate-900 focus:bg-white focus:border-[#0D47A1] outline-none pr-12"
+                            className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm text-slate-900 focus:bg-white focus:border-slate-900 outline-none pr-12"
                           />
                           <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                         </div>
@@ -412,7 +412,7 @@ const Clients: React.FC = () => {
                           <select 
                              value={formData.province}
                              onChange={(e) => setFormData({...formData, province: e.target.value})}
-                             className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm text-slate-900 appearance-none focus:bg-white focus:border-[#0D47A1] outline-none transition-all cursor-pointer"
+                             className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm text-slate-900 appearance-none focus:bg-white focus:border-slate-900 outline-none transition-all cursor-pointer"
                           >
                             {provinces.map(p => <option key={p} value={p}>{p}</option>)}
                           </select>
@@ -428,7 +428,7 @@ const Clients: React.FC = () => {
                             value={formData.address}
                             onChange={(e) => setFormData({...formData, address: e.target.value})}
                             placeholder="Complete street address, city"
-                            className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm text-slate-900 focus:bg-white focus:border-[#0D47A1] outline-none pr-12"
+                            className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm text-slate-900 focus:bg-white focus:border-slate-900 outline-none pr-12"
                           />
                           <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                         </div>
@@ -454,7 +454,7 @@ const Clients: React.FC = () => {
                   <button 
                     onClick={handleSubmit}
                     disabled={isSubmitting}
-                    className="bg-[#0D47A1] text-white px-10 py-4 rounded-2xl font-black text-sm shadow-xl shadow-blue-900/40 hover:bg-blue-800 transition-all flex items-center gap-3 active:scale-95 disabled:opacity-70 group"
+                    className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-black text-sm shadow-xl shadow-slate-900/40 hover:bg-slate-800 transition-all flex items-center gap-3 active:scale-95 disabled:opacity-70 group"
                   >
                     {isSubmitting ? (
                       <Loader2 className="w-5 h-5 animate-spin" />

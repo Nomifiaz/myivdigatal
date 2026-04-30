@@ -49,10 +49,17 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
     );
   }
 
-  const business = invoice.Business || initialBusinessData;
+  const business = invoice.Business || initialBusinessData || {};
   const client = invoice.Client || {};
   const items = invoice.InvoiceItems || invoice.items || [];
-  const invoiceNo = invoice.invoiceRefNo || `INV-${invoice.id || 'TEMP'}`;
+  const invoiceNo = invoice.invoiceRefNo || (invoice.id ? `INV-${invoice.id}` : 'TEMP');
+
+  // Fallback for buyer details if they are top-level on invoice
+  const buyerName = client.name || invoice.clientName || 'Customer';
+  const buyerAddress = client.address || invoice.clientAddress || invoice.buyerAddress || 'N/A';
+  const buyerPhone = client.phone || invoice.clientPhone || invoice.buyerPhone || 'N/A';
+  const buyerProvince = client.province || invoice.clientProvince || invoice.buyerProvince || 'N/A';
+  const buyerStatus = client.type || invoice.clientStatus || 'Unregistered';
 
   return (
     <div className="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm overflow-y-auto invoice-preview-container">
@@ -148,18 +155,18 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
                       <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-widest">BUYER INFORMATION</h3>
                   </div>
                   <div className="p-4 flex-1 space-y-1.5">
-                      <p className="text-base font-black text-slate-900" style={{ color: '#0f172a' }}>{client?.name || 'Customer'}</p>
+                      <p className="text-base font-black text-slate-900" style={{ color: '#0f172a' }}>{buyerName}</p>
                       <div className="text-[11px] font-medium text-slate-600 space-y-1" style={{ color: '#475569' }}>
-                          <p className="flex justify-between"><span>Address:</span> <span className="font-black text-slate-900 text-right" style={{ color: '#0f172a' }}>{client?.address || 'N/A'}</span></p>
+                          <p className="flex justify-between"><span>Address:</span> <span className="font-black text-slate-900 text-right max-w-[150px]" style={{ color: '#0f172a' }}>{buyerAddress}</span></p>
                           <div className="flex justify-between items-center">
                              <span>Phone:</span>
                              <div className="flex items-center gap-1 text-emerald-600 font-black" style={{ color: '#059669' }}>
                                 <MessageCircle className="w-3 h-3" />
-                                <span>+{client?.phone || 'N/A'}</span>
+                                <span>{buyerPhone !== 'N/A' ? `+${buyerPhone}` : 'N/A'}</span>
                              </div>
                           </div>
-                          <p className="flex justify-between"><span>Province:</span> <span className="font-black text-slate-900" style={{ color: '#0f172a' }}>{client?.province || 'N/A'}</span></p>
-                          <p className="flex justify-between"><span>Status:</span> <span className="text-red-600 font-black uppercase tracking-wider underline decoration-2 underline-offset-4" style={{ color: '#dc2626' }}>{client?.type || 'Unregistered'}</span></p>
+                          <p className="flex justify-between"><span>Province:</span> <span className="font-black text-slate-900" style={{ color: '#0f172a' }}>{buyerProvince}</span></p>
+                          <p className="flex justify-between"><span>Status:</span> <span className="text-red-600 font-black uppercase tracking-wider underline decoration-2 underline-offset-4" style={{ color: '#dc2626' }}>{buyerStatus}</span></p>
                       </div>
                   </div>
               </div>
@@ -190,7 +197,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
                           <div className="grid grid-cols-12 px-5 py-3 text-[11px] items-center">
                               <div className="col-span-1 font-black" style={{ color: '#94a3b8' }}>{idx + 1}</div>
                               <div className="col-span-4 pr-6">
-                                  <p className="font-black text-sm" style={{ color: '#0f172a' }}>{item.Product?.productName || item.productName || 'Product'}</p>
+                                  <p className="font-black text-sm" style={{ color: '#0f172a' }}>{item.Product?.productName || item.productName || item.productDescription || item.name || 'Product'}</p>
                                   <p className="text-[10px] font-bold mt-0.5 tracking-wider" style={{ color: '#64748b' }}>{item.hsCode || item.Product?.hsCode || '0000.0000'}</p>
                               </div>
                               <div className="col-span-1 text-center font-black">

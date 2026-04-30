@@ -53,7 +53,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
   const items = invoice.InvoiceItems || invoice.items || [];
 
   return (
-    <div className="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm overflow-y-auto no-print invoice-preview-container">
+    <div className="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm overflow-y-auto invoice-preview-container">
       <div className="min-h-screen flex flex-col py-10 px-4">
         {/* Action Bar */}
         <div className="max-w-5xl mx-auto w-full mb-6 flex items-center justify-between no-print bg-white p-4 rounded-2xl shadow-xl">
@@ -300,15 +300,19 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
             margin: 0;
           }
           
-          /* Hide everything except the invoice container */
-          body * {
-            visibility: hidden !important;
+          body {
+            background-color: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
           }
-          
-          .invoice-preview-container, 
-          .invoice-preview-container #printable-invoice,
-          .invoice-preview-container #printable-invoice * {
-            visibility: visible !important;
+
+          /* Hide everything except our specific container */
+          #root > div:not(.invoice-preview-container) {
+            display: none !important;
+          }
+
+          .no-print {
+            display: none !important;
           }
 
           .invoice-preview-container {
@@ -316,35 +320,31 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
             left: 0 !important;
             top: 0 !important;
             width: 100% !important;
-            height: auto !important;
-            margin: 0 !important;
             padding: 0 !important;
+            margin: 0 !important;
             background: white !important;
-            visibility: visible !important;
             display: block !important;
             z-index: 9999 !important;
+            overflow: visible !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
           }
 
-          /* Specifically hide UI components that shouldn't print */
-          .no-print, 
-          .no-print *,
-          button,
-          nav,
-          header {
-            display: none !important;
-            visibility: hidden !important;
+          .invoice-preview-container > div {
+            padding: 0 !important;
+            margin: 0 !important;
+            min-height: auto !important;
+            display: block !important;
           }
 
           #printable-invoice {
-            position: relative !important;
             margin: 0 auto !important;
-            width: 210mm !important;
-            height: 297mm !important;
-            padding: 20mm !important;
+            width: 170mm !important; /* Slightly smaller to ensure it fits with padding */
+            min-height: 257mm !important;
+            padding: 10mm !important;
             box-shadow: none !important;
             border: none !important;
             background: white !important;
-            visibility: visible !important;
             display: block !important;
           }
 

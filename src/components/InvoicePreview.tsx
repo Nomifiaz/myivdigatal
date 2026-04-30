@@ -3,14 +3,11 @@ import { motion } from 'motion/react';
 import { 
   ArrowLeft, 
   Printer, 
-  Download, 
   Loader2,
   Phone,
   MessageCircle,
 } from 'lucide-react';
 import { invoiceService } from '../services/api';
-// @ts-ignore
-import html2pdf from 'html2pdf.js';
 
 interface InvoicePreviewProps {
   invoice: any;
@@ -21,7 +18,6 @@ interface InvoicePreviewProps {
 const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice, businessData: initialBusinessData, onBack }) => {
   const [invoice, setInvoice] = useState<any>(initialInvoice);
   const [isLoading, setIsLoading] = useState(!initialInvoice.InvoiceItems);
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   useEffect(() => {
     const fetchFullInvoice = async () => {
@@ -43,28 +39,6 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
     window.print();
   };
 
-  const downloadPDF = () => {
-    const element = document.getElementById('printable-invoice');
-    if (!element) return;
-
-    setIsGeneratingPDF(true);
-
-    const opt = {
-      margin: 0,
-      filename: `${invoice.invoiceRefNo || `INV-${invoice.id}`}.pdf`,
-      image: { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-      jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
-    };
-
-    html2pdf().from(element).set(opt).save().then(() => {
-      setIsGeneratingPDF(false);
-    }).catch((err: any) => {
-      console.error("PDF Error:", err);
-      setIsGeneratingPDF(false);
-    });
-  };
-
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -79,57 +53,46 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
   const items = invoice.InvoiceItems || invoice.items || [];
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-20">
-      {/* Action Bar */}
-      <div className="flex items-center justify-between no-print">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={onBack}
-            className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
-          </button>
-          <h1 className="text-xl font-black text-slate-900 tracking-tight">Invoice Review</h1>
+    <div className="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm overflow-y-auto no-print invoice-preview-container">
+      <div className="min-h-screen flex flex-col py-10 px-4">
+        {/* Action Bar */}
+        <div className="max-w-5xl mx-auto w-full mb-6 flex items-center justify-between no-print bg-white p-4 rounded-2xl shadow-xl">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={onBack}
+              className="p-3 hover:bg-slate-100 rounded-xl transition-colors flex items-center gap-2 text-slate-600 font-bold"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Back to Ledger</span>
+            </button>
+          </div>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={printInvoice}
+              className="flex items-center gap-2 px-10 py-4 bg-[#0D47A1] text-white rounded-xl text-lg font-black hover:bg-[#1565C0] transition-all shadow-2xl shadow-blue-900/30 active:scale-95"
+            >
+              <Printer className="w-6 h-6" />
+              Print Official Invoice
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={printInvoice}
-            className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 text-slate-900 rounded-xl text-sm font-black hover:bg-slate-50 transition-all shadow-sm"
-          >
-            <Printer className="w-4 h-4" />
-            Print
-          </button>
-          <button 
-            onClick={downloadPDF}
-            disabled={isGeneratingPDF}
-            className="flex items-center gap-2 px-6 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-black hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20 disabled:opacity-50"
-          >
-            {isGeneratingPDF ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Download className="w-4 h-4" />
-            )}
-            {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
-          </button>
-        </div>
-      </div>
 
-      {/* Professional A4 Invoice */}
-      <div className="flex justify-center bg-slate-100 p-8 no-print min-h-screen">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-white shadow-2xl rounded-none overflow-hidden print:shadow-none print:m-0"
-          id="printable-invoice"
-          style={{ 
-            width: '210mm',
-            minHeight: '297mm',
-            padding: '40px', 
-            boxSizing: 'border-box',
-            backgroundColor: '#ffffff',
-            color: '#0f172a'
-          }}
-        >
+        {/* Professional A4 Invoice */}
+        <div className="flex justify-center pb-20">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white shadow-[0_0_100px_rgba(0,0,0,0.2)] rounded-none overflow-hidden print:shadow-none print:m-0"
+            id="printable-invoice"
+            style={{ 
+              width: '210mm',
+              minHeight: '297mm',
+              padding: '40px', 
+              boxSizing: 'border-box',
+              backgroundColor: '#ffffff',
+              color: '#0f172a'
+            }}
+          >
           {/* Header */}
           <div className="flex justify-between items-start mb-8">
               <div className="flex items-center gap-4">
@@ -336,22 +299,32 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
             size: A4;
             margin: 0;
           }
-          body {
-            background: white !important;
-            padding: 0 !important;
+          html, body {
+            height: 100%;
             margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            overflow: visible !important;
           }
           .no-print {
             display: none !important;
           }
+          #root > div:not(.invoice-preview-container) {
+            display: none !important;
+          }
           #printable-invoice {
-            width: 100% !important;
-            min-height: 100vh !important;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 210mm !important;
+            height: 297mm !important;
+            margin: 0 !important;
             padding: 15mm !important;
             box-shadow: none !important;
-            margin: 0 !important;
             border: none !important;
             transform: none !important;
+            background: #ffffff !important;
+            color: #000000 !important;
           }
           * {
             -webkit-print-color-adjust: exact !important;
@@ -360,6 +333,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
         }
       `}</style>
     </div>
+  </div>
   );
 };
 

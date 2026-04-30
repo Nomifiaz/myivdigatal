@@ -29,17 +29,33 @@ export default function App() {
     }
 
     try {
+      console.log('Checking business status...');
       const response = await authService.getBusiness();
+      console.log('Business API response:', response);
+      
       if (response.success && response.data) {
         setBusinessData(response.data);
         setCurrentScreen('dashboard');
       } else {
         setCurrentScreen('onboarding');
       }
-    } catch (err) {
-      // If unauthorized, logout
-      authService.logout();
-      setCurrentScreen('login');
+    } catch (err: any) {
+      console.error('Auth/Business check failed:', err);
+      if (err.status === 404) {
+        setCurrentScreen('onboarding');
+      } else {
+        // If unauthorized or other error, logout
+        // Only logout if we actually have a session error, not just a network error
+        if (err.status === 401 || err.status === 403) {
+          authService.logout();
+          setCurrentScreen('login');
+        } else {
+          // For other errors (like network), stay on current screen or handle gracefully
+          console.error('Network or server error:', err.message);
+          // If we just logged in and this failed, maybe go to onboarding as fallback if it's a 404
+          // but we already handle 404 above.
+        }
+      }
     } finally {
       setIsInitializing(false);
     }

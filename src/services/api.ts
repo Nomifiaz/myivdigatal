@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5010/api/v1';
+const API_BASE_URL = 'https://7277-182-180-130-107.ngrok-free.app/api/v1'.trim();
 
 export const authService = {
   getToken() {
@@ -64,7 +64,11 @@ export const authService = {
       headers: this.getHeaders(),
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Failed to fetch business');
+    if (!response.ok) {
+      const error: any = new Error(data.message || 'Failed to fetch business');
+      error.status = response.status;
+      throw error;
+    }
     return data;
   },
 

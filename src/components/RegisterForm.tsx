@@ -50,8 +50,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onForwardType }) => {
             </div>
             <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Create Account</h3>
         </div>
-        <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Join BizManager Pro</h2>
-        <p className="text-slate-500 mt-2">Precision management for high-stakes businesses.</p>
+        <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Join Invoizeo</h2>
+        <p className="text-slate-500 mt-2 font-medium">Smart billing, clear business. Start your journey.</p>
       </div>
 
       {error && (
@@ -71,7 +71,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onForwardType }) => {
             Full Name
           </label>
           <div className="relative group">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-[#0D47A1] transition-colors" />
             <input 
               id="fullname"
               type="text" 
@@ -79,7 +79,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onForwardType }) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="John Doe"
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all disabled:opacity-50"
+              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#0D47A1]/20 focus:border-[#0D47A1] transition-all disabled:opacity-50"
               disabled={isLoading}
             />
           </div>
@@ -90,7 +90,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onForwardType }) => {
             Email Address
           </label>
           <div className="relative group">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-[#0D47A1] transition-colors" />
             <input 
               id="reg-email"
               type="email" 
@@ -98,7 +98,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onForwardType }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="john.doe@enterprise.com"
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all disabled:opacity-50"
+              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#0D47A1]/20 focus:border-[#0D47A1] transition-all disabled:opacity-50"
               disabled={isLoading}
             />
           </div>
@@ -110,7 +110,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onForwardType }) => {
               Password
             </label>
             <div className="relative group">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-[#0D47A1] transition-colors" />
               <input 
                 id="reg-password"
                 type="password" 
@@ -118,7 +118,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onForwardType }) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm transition-all disabled:opacity-50"
+                className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#0D47A1]/20 focus:border-[#0D47A1] text-sm transition-all disabled:opacity-50"
                 disabled={isLoading}
               />
             </div>
@@ -128,7 +128,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onForwardType }) => {
               Confirm
             </label>
             <div className="relative group">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-[#0D47A1] transition-colors" />
               <input 
                 id="confirm-password"
                 type="password" 
@@ -136,7 +136,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onForwardType }) => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm transition-all disabled:opacity-50"
+                className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#0D47A1]/20 focus:border-[#0D47A1] text-sm transition-all disabled:opacity-50"
                 disabled={isLoading}
               />
             </div>
@@ -148,11 +148,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onForwardType }) => {
             type="checkbox" 
             id="terms" 
             required
-            className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600 disabled:opacity-50" 
+            className="mt-1 w-4 h-4 rounded border-slate-300 text-[#0D47A1] focus:ring-[#0D47A1] disabled:opacity-50" 
             disabled={isLoading}
           />
-          <label htmlFor="terms" className="text-xs text-slate-500 leading-tight">
-            I agree to the <span className="text-blue-600 cursor-pointer hover:underline">Terms of Service</span> and <span className="text-blue-600 cursor-pointer hover:underline">Privacy Policy</span>.
+          <label htmlFor="terms" className="text-xs text-slate-500 leading-tight font-medium">
+            I agree to the <span className="text-[#0D47A1] cursor-pointer hover:underline font-bold">Terms</span> and <span className="text-[#0D47A1] cursor-pointer hover:underline font-bold">Privacy Policy</span>.
           </label>
         </div>
 
@@ -192,11 +192,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onForwardType }) => {
         </button>
       </div>
 
-      <p className="text-center text-sm text-slate-500">
+      <p className="text-center text-sm text-slate-500 font-medium">
         Already have an account?{' '}
         <button 
           onClick={() => onForwardType('login')}
-          className="text-blue-600 font-semibold hover:underline"
+          className="text-[#0D47A1] font-bold hover:underline"
         >
           Sign In
         </button>

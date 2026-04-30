@@ -22,6 +22,7 @@ import {
   Lock,
   RotateCw
 } from 'lucide-react';
+import { Logo } from './Brand';
 import { authService } from '../services/api';
 
 interface DashboardProps {
@@ -37,14 +38,7 @@ const Dashboard: React.FC<DashboardProps> = ({ businessData, onLogout }) => {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 h-20 bg-white border-b border-slate-200 z-50 px-6 sm:px-10 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <div className="flex items-center gap-2">
-            <div className="bg-slate-900 p-2 rounded-lg text-white">
-              <Building2 className="w-5 h-5" />
-            </div>
-            <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600">
-              BizManager
-            </span>
-          </div>
+          <Logo showText size="md" />
           <nav className="hidden md:flex items-center gap-6">
             <a href="#" className="text-sm font-semibold text-slate-900 px-3 py-2 bg-slate-50 rounded-lg">Dashboard</a>
             <a href="#" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Inventory</a>
@@ -177,7 +171,7 @@ const Dashboard: React.FC<DashboardProps> = ({ businessData, onLogout }) => {
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
                <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
                 <h3 className="text-lg font-bold text-slate-900">Recent Invoices</h3>
-                <button className="text-sm font-bold text-blue-600 hover:underline">View All</button>
+                <button className="text-sm font-bold text-[#0D47A1] hover:underline">View All</button>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
@@ -258,11 +252,11 @@ const Dashboard: React.FC<DashboardProps> = ({ businessData, onLogout }) => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-8 text-white relative overflow-hidden group">
+            <div className="bg-gradient-to-br from-[#0D47A1] to-[#00B8D4] rounded-3xl p-8 text-white relative overflow-hidden group">
               <HelpCircle className="absolute -right-6 -top-6 w-32 h-32 text-white/10 group-hover:scale-110 transition-transform duration-500" />
               <h3 className="text-lg font-bold mb-2">Need Assistance?</h3>
-              <p className="text-blue-100 text-sm mb-6 leading-relaxed">Our enterprise account specialists are available 24/7 to help with your operations.</p>
-              <button className="w-full py-3.5 bg-white text-blue-600 rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-all active:scale-[0.98]">
+              <p className="text-blue-50 text-sm mb-6 leading-relaxed">Our Invoizeo account specialists are available 24/7 to help with your operations.</p>
+              <button className="w-full py-3.5 bg-white text-[#0D47A1] rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-all active:scale-[0.98]">
                 Chat with Support
               </button>
             </div>
@@ -292,7 +286,7 @@ const Overview: React.FC<{ businessData: any }> = () => (
 
     <div className="grid grid-cols-4 gap-6">
       {[
-        { label: 'Total Revenue', value: '$128,430', change: '+12.5%', icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
+        { label: 'Total Revenue', value: '$128,430', change: '+12.5%', icon: TrendingUp, color: 'text-[#0D47A1]', bg: 'bg-blue-50' },
         { label: 'Active Clients', value: '1,240', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
         { label: 'Market Sentiment', value: 'Optimistic', icon: Building2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
         { label: 'Growth Vector', value: 'Aggressive', icon: ShieldCheck, color: 'text-slate-600', bg: 'bg-slate-50' },
@@ -451,7 +445,7 @@ const BusinessSetup: React.FC<{ businessData: any }> = ({ businessData }) => (
                 <img src={authService.getLogoUrl(businessData.logo) || ''} alt="Brand Logo" className="w-full h-full object-contain p-8" />
               ) : (
                 <>
-                  <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-4">
+                  <div className="w-16 h-16 bg-[#0D47A1]/10 rounded-2xl flex items-center justify-center text-[#0D47A1] mb-4">
                     <Upload className="w-8 h-8" />
                   </div>
                   <p className="text-sm font-bold text-slate-900 text-center px-4">Drag and drop logo</p>
@@ -485,7 +479,7 @@ const BusinessSetup: React.FC<{ businessData: any }> = ({ businessData }) => (
               </div>
             </div>
             <div className="flex items-center gap-3 pt-2">
-              <div className={`w-5 h-5 rounded border ${businessData.isFbrEnabled ? 'bg-blue-600 border-blue-600' : 'bg-slate-100 border-slate-200'}`}>
+              <div className={`w-5 h-5 rounded border ${businessData.isFbrEnabled ? 'bg-[#0D47A1] border-[#0D47A1]' : 'bg-slate-100 border-slate-200'}`}>
                 {businessData.isFbrEnabled && <Plus className="w-4 h-4 text-white rotate-45" />}
               </div>
               <span className="text-sm font-bold text-slate-700">FBR Integration Enabled</span>

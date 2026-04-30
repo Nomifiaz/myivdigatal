@@ -230,7 +230,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        placeholder="e.g. BizManager Pro Enterprise"
+                        placeholder="e.g. Invoizeo Enterprise Solutions"
                         className="w-full px-6 py-4 bg-white border border-slate-300 rounded-2xl outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 transition-all font-bold text-slate-800"
                       />
                     </div>

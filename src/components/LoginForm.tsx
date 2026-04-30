@@ -58,7 +58,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForwardType, onLoginSuccess }) 
             Email Address
           </label>
           <div className="relative group">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-colors group-focus-within:text-blue-600" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-colors group-focus-within:text-[#0D47A1]" />
             <input 
               id="email"
               type="email" 
@@ -66,7 +66,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForwardType, onLoginSuccess }) 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@company.com"
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all disabled:opacity-50"
+              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#0D47A1]/20 focus:border-[#0D47A1] transition-all disabled:opacity-50"
               disabled={isLoading}
             />
           </div>
@@ -80,14 +80,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForwardType, onLoginSuccess }) 
             <button 
               type="button" 
               onClick={() => onForwardType('forgot')}
-              className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+              className="text-xs font-semibold text-[#0D47A1] hover:text-[#00B8D4] transition-colors"
               disabled={isLoading}
             >
               Forgot password?
             </button>
           </div>
           <div className="relative group">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-colors group-focus-within:text-blue-600" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-colors group-focus-within:text-[#0D47A1]" />
             <input 
               id="password"
               type="password" 
@@ -95,7 +95,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForwardType, onLoginSuccess }) 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all disabled:opacity-50"
+              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#0D47A1]/20 focus:border-[#0D47A1] transition-all disabled:opacity-50"
               disabled={isLoading}
             />
           </div>
@@ -105,10 +105,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForwardType, onLoginSuccess }) 
           <input 
             type="checkbox" 
             id="remember" 
-            className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600 disabled:opacity-50" 
+            className="w-4 h-4 rounded border-slate-300 text-[#0D47A1] focus:ring-[#0D47A1] disabled:opacity-50" 
             disabled={isLoading}
           />
-          <label htmlFor="remember" className="text-sm text-slate-600">Keep me signed in for 30 days</label>
+          <label htmlFor="remember" className="text-sm text-slate-600 font-medium">Keep me signed in for 30 days</label>
         </div>
 
         <button 
@@ -149,11 +149,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForwardType, onLoginSuccess }) 
         </button>
       </div>
 
-      <p className="text-center text-sm text-slate-500">
+      <p className="text-center text-sm text-slate-500 font-medium">
         Don't have an account?{' '}
         <button 
           onClick={() => onForwardType('register')}
-          className="text-blue-600 font-semibold hover:underline"
+          className="text-[#0D47A1] font-bold hover:underline"
         >
           Register your business
         </button>

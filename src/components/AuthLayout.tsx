@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { LayoutDashboard, ShieldCheck, Activity } from 'lucide-react';
+import { ShieldCheck, Activity } from 'lucide-react';
+import { Logo } from './Brand';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -18,20 +19,18 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitle }) =>
           {/* Background Image with Overlay */}
           <div className="absolute inset-0 z-0">
             <img 
-              src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"
-              alt="Enterprise Building"
-              className="w-full h-full object-cover opacity-30 scale-110"
+              src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=2111&auto=format&fit=crop"
+              alt="Digital Finance"
+              className="w-full h-full object-cover opacity-20 scale-110 grayscale"
               referrerPolicy="no-referrer"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-950/80 to-transparent" />
           </div>
 
           <div className="relative z-10">
-            <div className="flex items-center gap-2 text-white mb-12">
-              <div className="bg-white/10 p-2 rounded-lg backdrop-blur-md border border-white/20">
-                <LayoutDashboard className="w-6 h-6" />
-              </div>
-              <span className="text-xl font-bold tracking-tight">BizManager Pro</span>
+            <div className="flex items-center gap-3 text-white mb-16">
+               <Logo size="md" />
+               <span className="text-2xl font-black tracking-tight">Invoizeo</span>
             </div>
 
             <motion.div
@@ -39,10 +38,10 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitle }) =>
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <h1 className="text-4xl lg:text-5xl font-semibold text-white leading-tight mb-6">
+              <h1 className="text-4xl lg:text-5xl font-black text-white leading-[1.1] mb-6">
                 {title}
               </h1>
-              <p className="text-slate-400 text-lg max-w-md leading-relaxed">
+              <p className="text-slate-400 text-lg max-w-md leading-relaxed font-medium">
                 {subtitle}
               </p>
             </motion.div>
@@ -66,7 +65,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitle }) =>
                     initial={{ width: 0 }}
                     animate={{ width: '70%' }}
                     transition={{ delay: 0.8, duration: 1.5, ease: "easeOut" }}
-                    className="h-full bg-blue-500"
+                    className="h-full bg-[#0D47A1]"
                   />
                 </div>
               </div>

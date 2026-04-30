@@ -93,7 +93,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onForwardType }
                           Registered Email
                       </label>
                       <div className="relative group">
-                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-[#0D47A1] transition-colors" />
                           <input 
                               id="reset-email"
                               type="email" 
@@ -101,7 +101,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onForwardType }
                               value={email}
                               onChange={(e) => setEmail(e.target.value)}
                               placeholder="e.g. james.smith@enterprise.com"
-                              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all disabled:opacity-50"
+                              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#0D47A1]/20 focus:border-[#0D47A1] transition-all disabled:opacity-50"
                               disabled={isLoading}
                           />
                       </div>
@@ -123,9 +123,9 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onForwardType }
 
                 <div className="h-px bg-slate-100 w-full" />
 
-                <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex gap-3">
-                    <Info className="w-5 h-5 text-blue-500 shrink-0" />
-                    <p className="text-xs text-blue-700 leading-normal">
+                <div className="bg-[#0D47A1]/5 border border-[#0D47A1]/10 p-4 rounded-2xl flex gap-3">
+                    <Info className="w-5 h-5 text-[#0D47A1] shrink-0" />
+                    <p className="text-xs text-[#0D47A1] leading-normal font-medium">
                         Security Notice: If you don't receive an email within 5 minutes, please check your spam folder.
                     </p>
                 </div>
@@ -144,7 +144,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onForwardType }
                           5-Digit Code
                       </label>
                       <div className="relative group">
-                          <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                          <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-[#0D47A1] transition-colors" />
                           <input 
                               id="otp"
                               type="text" 
@@ -153,7 +153,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onForwardType }
                               value={otp}
                               onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                               placeholder="12345"
-                              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all text-center tracking-[0.5em] font-mono text-xl disabled:opacity-50"
+                              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#0D47A1]/20 focus:border-[#0D47A1] transition-all text-center tracking-[0.5em] font-mono text-xl disabled:opacity-50"
                               disabled={isLoading}
                           />
                       </div>
@@ -164,7 +164,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onForwardType }
                           New Password
                       </label>
                       <div className="relative group">
-                          <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                          <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-[#0D47A1] transition-colors" />
                           <input 
                               id="new-password"
                               type="password" 
@@ -172,7 +172,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onForwardType }
                               value={newPassword}
                               onChange={(e) => setNewPassword(e.target.value)}
                               placeholder="••••••••"
-                              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all disabled:opacity-50"
+                              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#0D47A1]/20 focus:border-[#0D47A1] transition-all disabled:opacity-50"
                               disabled={isLoading}
                           />
                       </div>

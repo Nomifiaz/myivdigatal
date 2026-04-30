@@ -11,6 +11,7 @@ import RegisterForm from './components/RegisterForm';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
 import Onboarding from './components/Onboarding';
 import Dashboard from './components/Dashboard';
+import { Logo } from './components/Brand';
 import { authService } from './services/api';
 import { Loader2 } from 'lucide-react';
 
@@ -44,16 +45,9 @@ export default function App() {
       if (err.status === 404) {
         setCurrentScreen('onboarding');
       } else {
-        // If unauthorized or other error, logout
-        // Only logout if we actually have a session error, not just a network error
         if (err.status === 401 || err.status === 403) {
           authService.logout();
           setCurrentScreen('login');
-        } else {
-          // For other errors (like network), stay on current screen or handle gracefully
-          console.error('Network or server error:', err.message);
-          // If we just logged in and this failed, maybe go to onboarding as fallback if it's a 404
-          // but we already handle 404 above.
         }
       }
     } finally {
@@ -80,9 +74,12 @@ export default function App() {
   if (isInitializing) {
     return (
       <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 text-slate-900 animate-spin" />
-          <p className="text-slate-500 font-medium animate-pulse text-sm uppercase tracking-widest">Initializing BizManager...</p>
+        <div className="flex flex-col items-center gap-6">
+          <Logo size="lg" className="animate-pulse" />
+          <div className="flex flex-col items-center gap-2">
+            <Loader2 className="w-6 h-6 text-slate-900 animate-spin" />
+            <p className="text-slate-500 font-bold text-xs uppercase tracking-[0.2em]">Loading Invoizeo</p>
+          </div>
         </div>
       </div>
     );
@@ -94,8 +91,8 @@ export default function App() {
         {currentScreen === 'login' && (
           <AuthLayout 
             key="login"
-            title="Enterprise-Grade Business Intelligence."
-            subtitle="Streamline your operations with our professional-grade suite for products, invoices, and automated financial reporting."
+            title="Digital Invoicing Simplified."
+            subtitle="Smart billing, clear business. Join the next generation of financial management with Invoizeo's professional-grade suite."
           >
             <LoginForm 
               onForwardType={setCurrentScreen} 
@@ -107,7 +104,7 @@ export default function App() {
         {currentScreen === 'register' && (
           <AuthLayout 
             key="register"
-            title="Scale your vision with BizManager Pro."
+            title="Scale your vision with Invoizeo Pro."
             subtitle="Join over 10,000+ businesses using our platform to optimize their workflows and drive sustainable growth."
           >
             <RegisterForm onForwardType={setCurrentScreen} />

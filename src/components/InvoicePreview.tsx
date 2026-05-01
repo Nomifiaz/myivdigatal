@@ -21,13 +21,16 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
   const [invoice, setInvoice] = useState<any>(initialInvoice);
   const [isLoading, setIsLoading] = useState(!initialInvoice.InvoiceItems);
   const [downloading, setDownloading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     const fetchFullInvoice = async () => {
       if (!initialInvoice.InvoiceItems && initialInvoice.id) {
         try {
           const response = await invoiceService.getInvoiceById(initialInvoice.id);
-          setInvoice(response.invoice || response);
+          // Standardize response based on user provided JSON structure
+          const invoiceData = response.invoice || response;
+          setInvoice(invoiceData);
         } catch (err) {
           console.error("Failed to fetch full invoice:", err);
         } finally {
@@ -47,6 +50,8 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
     try {
       setDownloading(true);
       await authService.downloadInvoice(invoice.id, `${invoiceNo}.pdf`);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
     } catch (err) {
       console.error("Download failed:", err);
       alert("Failed to download PDF. Please try again.");
@@ -69,15 +74,37 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
   const items = invoice.InvoiceItems || invoice.items || [];
   const invoiceNo = invoice.invoiceRefNo || (invoice.id ? `INV-${invoice.id}` : 'TEMP');
 
-  // Fallback for buyer details if they are top-level on invoice
+  // Improved extraction for buyer details
   const buyerName = client.name || invoice.clientName || 'Customer';
   const buyerAddress = client.address || invoice.clientAddress || invoice.buyerAddress || 'N/A';
   const buyerPhone = client.phone || invoice.clientPhone || invoice.buyerPhone || 'N/A';
   const buyerProvince = client.province || invoice.clientProvince || invoice.buyerProvince || 'N/A';
   const buyerStatus = client.type || invoice.clientStatus || 'Unregistered';
+  const buyerNTN = client.ntn || invoice.clientNTN || 'N/A';
+  const buyerCNIC = client.cnic || invoice.clientCNIC || 'N/A';
 
   return (
     <div className="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm overflow-y-auto invoice-preview-container">
+      {/* Stylish Success Notification */}
+      {showSuccess && (
+        <motion.div 
+          initial={{ opacity: 0, y: -100, scale: 0.5 }}
+          animate={{ opacity: 1, y: 30, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.5 }}
+          className="fixed top-0 left-1/2 -translate-x-1/2 z-[100] no-print"
+        >
+          <div className="bg-emerald-500 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border-2 border-emerald-400/50 backdrop-blur-md">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <Download className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="font-black text-sm uppercase tracking-widest">Download Successful</p>
+              <p className="text-white/80 text-[10px] font-bold uppercase">Your invoice is ready to view</p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       <div className="min-h-screen flex flex-col py-6 px-4">
         {/* Action Bar */}
         <div className="max-w-5xl mx-auto w-full mb-6 flex items-center justify-between no-print bg-white p-4 rounded-2xl shadow-xl">
@@ -185,16 +212,18 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
                   <div className="p-4 flex-1 space-y-1.5">
                       <p className="text-base font-black text-slate-900" style={{ color: '#0f172a' }}>{buyerName}</p>
                       <div className="text-[11px] font-medium text-slate-600 space-y-1" style={{ color: '#475569' }}>
-                          <p className="flex justify-between"><span>Address:</span> <span className="font-black text-slate-900 text-right max-w-[150px]" style={{ color: '#0f172a' }}>{buyerAddress}</span></p>
+                          <p className="flex justify-between items-start gap-4"><span>Address:</span> <span className="font-black text-slate-900 text-right max-w-[160px]" style={{ color: '#0f172a' }}>{buyerAddress}</span></p>
                           <div className="flex justify-between items-center">
                              <span>Phone:</span>
                              <div className="flex items-center gap-1 text-emerald-600 font-black" style={{ color: '#059669' }}>
                                 <MessageCircle className="w-3 h-3" />
-                                <span>{buyerPhone !== 'N/A' ? `+${buyerPhone}` : 'N/A'}</span>
+                                <span>{buyerPhone !== 'N/A' ? (buyerPhone.startsWith('+') ? buyerPhone : `+${buyerPhone}`) : 'N/A'}</span>
                              </div>
                           </div>
                           <p className="flex justify-between"><span>Province:</span> <span className="font-black text-slate-900" style={{ color: '#0f172a' }}>{buyerProvince}</span></p>
-                          <p className="flex justify-between"><span>Status:</span> <span className="text-red-600 font-black uppercase tracking-wider underline decoration-2 underline-offset-4" style={{ color: '#dc2626' }}>{buyerStatus}</span></p>
+                          {buyerNTN !== 'N/A' && <p className="flex justify-between"><span>NTN:</span> <span className="font-black text-slate-900" style={{ color: '#0f172a' }}>{buyerNTN}</span></p>}
+                          {buyerCNIC !== 'N/A' && <p className="flex justify-between"><span>CNIC:</span> <span className="font-black text-slate-900" style={{ color: '#0f172a' }}>{buyerCNIC}</span></p>}
+                          <p className="flex justify-between pt-1 border-t border-slate-200/50"><span>Status:</span> <span className="text-red-600 font-black uppercase tracking-wider underline decoration-2 underline-offset-4" style={{ color: '#dc2626' }}>{buyerStatus}</span></p>
                       </div>
                   </div>
               </div>

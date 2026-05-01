@@ -91,6 +91,17 @@ export const authService = {
     return data;
   },
 
+  async updateFbrStatus(id: number, isFbrEnabled: boolean) {
+    const response = await fetch(`${API_BASE_URL}/businesses/fbr-status`, {
+      method: 'PATCH',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ id, isFbrEnabled }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to update FBR status');
+    return data;
+  },
+
   setToken(token: string) {
     localStorage.setItem('auth_token', token);
   },

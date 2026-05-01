@@ -232,6 +232,21 @@ const Overview: React.FC<{ businessData: any; onTabChange: (tab: any) => void }>
 };
 
 const BusinessSetup: React.FC<{ businessData: any }> = ({ businessData }) => {
+  const [isFbrEnabled, setIsFbrEnabled] = useState(businessData?.isFbrEnabled || false);
+  const [loading, setLoading] = useState(false);
+
+  const handleToggleFbr = async () => {
+    try {
+      setLoading(true);
+      await authService.updateFbrStatus(businessData.id, !isFbrEnabled);
+      setIsFbrEnabled(!isFbrEnabled);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -327,6 +342,32 @@ const BusinessSetup: React.FC<{ businessData: any }> = ({ businessData }) => {
                 <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">FBR Configuration</h3>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Secure connectivity tokens for POS integration</p>
               </div>
+            </div>
+
+            <div className="p-6 bg-slate-50 rounded-3xl border border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className={`p-3 rounded-2xl ${isFbrEnabled ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-200 text-slate-500'}`}>
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight">FBR Integration Status</h4>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
+                    {isFbrEnabled ? 'Real-time tax reporting enabled' : 'Reporting is currently offline'}
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={handleToggleFbr}
+                disabled={loading}
+                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#0D47A1] focus:ring-offset-2 ${isFbrEnabled ? 'bg-emerald-500' : 'bg-slate-300'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <span className="sr-only">Toggle FBR</span>
+                <span
+                  className={`${
+                    isFbrEnabled ? 'translate-x-7' : 'translate-x-1'
+                  } inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-sm`}
+                />
+              </button>
             </div>
 
             <div className="space-y-6">

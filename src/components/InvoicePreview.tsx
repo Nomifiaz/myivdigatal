@@ -6,9 +6,10 @@ import {
   Loader2,
   Phone,
   MessageCircle,
+  Download,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import { invoiceService } from '../services/api';
+import { invoiceService, authService } from '../services/api';
 
 interface InvoicePreviewProps {
   invoice: any;
@@ -19,6 +20,7 @@ interface InvoicePreviewProps {
 const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice, businessData: initialBusinessData, onBack }) => {
   const [invoice, setInvoice] = useState<any>(initialInvoice);
   const [isLoading, setIsLoading] = useState(!initialInvoice.InvoiceItems);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     const fetchFullInvoice = async () => {
@@ -38,6 +40,19 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
 
   const printInvoice = () => {
     window.print();
+  };
+
+  const handleDownload = async () => {
+    if (!invoice?.id) return;
+    try {
+      setDownloading(true);
+      await authService.downloadInvoice(invoice.id, `${invoiceNo}.pdf`);
+    } catch (err) {
+      console.error("Download failed:", err);
+      alert("Failed to download PDF. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
   };
 
   if (isLoading) {
@@ -77,6 +92,14 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
           </div>
           <div className="flex items-center gap-3">
             <button 
+              onClick={handleDownload}
+              disabled={downloading}
+              className="flex items-center gap-2 px-6 py-4 bg-slate-100 text-slate-700 rounded-xl text-lg font-bold hover:bg-slate-200 transition-all active:scale-95 disabled:opacity-50"
+            >
+              {downloading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
+              <span>Download PDF</span>
+            </button>
+            <button 
               onClick={printInvoice}
               className="flex items-center gap-2 px-10 py-4 bg-[#0D47A1] text-white rounded-xl text-lg font-black hover:bg-[#1565C0] transition-all shadow-2xl shadow-blue-900/30 active:scale-95"
             >
@@ -107,7 +130,12 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice: initialInvoice
           <div className="flex justify-between items-start mb-6">
               <div className="flex items-center gap-4">
                   {business?.logo ? (
-                    <img src={business.logo} alt="Logo" className="w-16 h-16 object-contain" referrerPolicy="no-referrer" />
+                    <img 
+                      src={authService.getLogoUrl(business.logo) || ''} 
+                      alt="Logo" 
+                      className="w-16 h-16 object-contain" 
+                      referrerPolicy="no-referrer" 
+                    />
                   ) : (
                     <div className="w-14 h-14 bg-[#0D47A1] rounded-lg flex items-center justify-center text-white" style={{ backgroundColor: '#0D47A1' }}>
                         <div className="grid grid-cols-2 gap-0.5">

@@ -91,6 +91,23 @@ export const authService = {
     return data;
   },
 
+  async downloadInvoice(id: number, filename: string) {
+    const response = await fetch(`${API_BASE_URL}/invoice/${id}/download`, {
+      headers: this.getHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to download invoice');
+    
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename || `Invoice-${id}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  },
+
   async updateFbrStatus(id: number, isFbrEnabled: boolean) {
     const response = await fetch(`${API_BASE_URL}/businesses/fbr-status`, {
       method: 'PATCH',

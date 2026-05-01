@@ -231,19 +231,66 @@ const Overview: React.FC<{ businessData: any; onTabChange: (tab: any) => void }>
   );
 };
 
-const BusinessSetup: React.FC<{ businessData: any }> = ({ businessData }) => {
-  const [isFbrEnabled, setIsFbrEnabled] = useState(businessData?.isFbrEnabled || false);
+const BusinessSetup: React.FC<{ businessData: any }> = ({ businessData: initialData }) => {
+  const [formData, setFormData] = useState({
+    name: initialData?.name || '',
+    ntn: initialData?.ntn || '',
+    cnic: initialData?.cnic || '',
+    province: initialData?.province || '',
+    address: initialData?.address || '',
+  });
+  const [isFbrEnabled, setIsFbrEnabled] = useState(initialData?.isFbrEnabled || false);
   const [loading, setLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(authService.getLogoUrl(initialData?.logo));
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      setLogoPreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleToggleFbr = async () => {
     try {
       setLoading(true);
-      await authService.updateFbrStatus(businessData.id, !isFbrEnabled);
+      await authService.updateFbrStatus(initialData.id, !isFbrEnabled);
       setIsFbrEnabled(!isFbrEnabled);
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateProfile = async () => {
+    try {
+      setSaveLoading(true);
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('ntn', formData.ntn);
+      data.append('cnic', formData.cnic);
+      data.append('province', formData.province);
+      data.append('address', formData.address);
+      if (logoFile) {
+        data.append('logo', logoFile);
+      }
+
+      await authService.updateBusiness(initialData.id, data);
+      alert('Business profile updated successfully!');
+      window.location.reload(); // Refresh to update all data across app
+    } catch (error) {
+      console.error(error);
+      alert('Failed to update business profile');
+    } finally {
+      setSaveLoading(false);
     }
   };
 
@@ -260,9 +307,13 @@ const BusinessSetup: React.FC<{ businessData: any }> = ({ businessData }) => {
           <p className="text-slate-500 mt-2">Manage your business identity, tax compliance, and FBR connectivity.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="px-5 py-2.5 bg-[#0D47A1] text-white text-sm font-bold rounded-xl hover:bg-[#1565C0] transition-all shadow-lg shadow-blue-900/10 flex items-center gap-2">
-            <RotateCw className="w-4 h-4" />
-            Update Settings
+          <button 
+            onClick={handleUpdateProfile}
+            disabled={saveLoading}
+            className="px-5 py-2.5 bg-[#0D47A1] text-white text-sm font-bold rounded-xl hover:bg-[#1565C0] transition-all shadow-lg shadow-blue-900/10 flex items-center gap-2 disabled:opacity-50"
+          >
+            {saveLoading ? <RotateCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+            Save Changes
           </button>
         </div>
       </div>
@@ -289,9 +340,10 @@ const BusinessSetup: React.FC<{ businessData: any }> = ({ businessData }) => {
                     <Building2 className="w-4 h-4" />
                   </div>
                   <input 
-                    readOnly 
-                    value={businessData?.name} 
-                    className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold focus:bg-white transition-all ring-0 border-transparent focus:border-slate-900/10" 
+                    name="name"
+                    value={formData.name} 
+                    onChange={handleInputChange}
+                    className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold focus:bg-white transition-all focus:ring-2 focus:ring-blue-100 focus:border-[#0D47A1] outline-none" 
                   />
                 </div>
               </div>
@@ -302,19 +354,30 @@ const BusinessSetup: React.FC<{ businessData: any }> = ({ businessData }) => {
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                   <input 
-                    readOnly 
-                    value={businessData?.ntn} 
-                    className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold transition-all" 
+                    name="ntn"
+                    value={formData.ntn} 
+                    onChange={handleInputChange}
+                    className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold transition-all focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-[#0D47A1] outline-none" 
                   />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">CNIC / Registration</label>
-                <input readOnly value={businessData?.cnic} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold" />
+                <input 
+                  name="cnic"
+                  value={formData.cnic} 
+                  onChange={handleInputChange}
+                  className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold focus:bg-white transition-all outline-none focus:ring-2 focus:ring-blue-100" 
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Province</label>
-                <input readOnly value={businessData?.province} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold" />
+                <input 
+                  name="province"
+                  value={formData.province} 
+                  onChange={handleInputChange}
+                  className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold focus:bg-white transition-all outline-none focus:ring-2 focus:ring-blue-100" 
+                />
               </div>
             </div>
             <div className="space-y-2">
@@ -324,9 +387,10 @@ const BusinessSetup: React.FC<{ businessData: any }> = ({ businessData }) => {
                   <MapPin className="w-4 h-4" />
                 </div>
                 <input 
-                  readOnly 
-                  value={businessData?.address} 
-                  className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold" 
+                  name="address"
+                  value={formData.address} 
+                  onChange={handleInputChange}
+                  className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold transition-all focus:bg-white outline-none focus:ring-2 focus:ring-blue-100" 
                 />
               </div>
             </div>
@@ -380,7 +444,7 @@ const BusinessSetup: React.FC<{ businessData: any }> = ({ businessData }) => {
                   <input 
                     readOnly 
                     type="password"
-                    value={businessData?.fbrSandboxToken || '••••••••••••••••'} 
+                    value={initialData?.fbrSandboxToken || '••••••••••••••••'} 
                     className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-mono text-sm" 
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -397,7 +461,7 @@ const BusinessSetup: React.FC<{ businessData: any }> = ({ businessData }) => {
                   <input 
                     readOnly 
                     type="password"
-                    value={businessData?.fbrProductionToken || '••••••••••••••••'} 
+                    value={initialData?.fbrProductionToken || '••••••••••••••••'} 
                     className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-mono text-sm" 
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -421,10 +485,11 @@ const BusinessSetup: React.FC<{ businessData: any }> = ({ businessData }) => {
 
         <div className="space-y-6">
           <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm p-8 flex flex-col items-center">
-            <div className="w-40 h-40 bg-slate-50 rounded-[32px] flex items-center justify-center text-slate-300 mb-6 border-2 border-dashed border-slate-200 relative group overflow-hidden">
-               {businessData?.logo ? (
+            <label className="w-40 h-40 bg-slate-50 rounded-[32px] flex items-center justify-center text-slate-300 mb-6 border-2 border-dashed border-slate-200 relative group overflow-hidden cursor-pointer">
+               <input type="file" className="hidden" accept="image/*" onChange={handleLogoChange} />
+               {logoPreview ? (
                 <img 
-                  src={authService.getLogoUrl(businessData.logo) || ''} 
+                  src={logoPreview} 
                   alt="Logo" 
                   className="w-full h-full object-contain p-6 group-hover:scale-110 transition-transform" 
                   referrerPolicy="no-referrer"
@@ -435,10 +500,10 @@ const BusinessSetup: React.FC<{ businessData: any }> = ({ businessData }) => {
               <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
                 <Upload className="w-8 h-8 text-white" />
               </div>
-            </div>
+            </label>
             <div className="text-center">
               <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest">Brand Mark</h4>
-              <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Visible on all tax invoices</p>
+              <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Click to upload new logo</p>
             </div>
           </div>
 

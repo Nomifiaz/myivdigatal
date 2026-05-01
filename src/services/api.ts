@@ -91,6 +91,18 @@ export const authService = {
     return data;
   },
 
+  async updateBusiness(id: number, businessData: FormData) {
+    const token = this.getToken();
+    const response = await fetch(`${API_BASE_URL}/businesses/${id}`, {
+      method: 'PATCH',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      body: businessData,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to update business');
+    return data;
+  },
+
   async downloadInvoice(id: number, filename: string) {
     const response = await fetch(`${API_BASE_URL}/invoice/${id}/download`, {
       headers: this.getHeaders(),

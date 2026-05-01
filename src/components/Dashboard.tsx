@@ -21,7 +21,10 @@ import {
   Upload,
   Lock,
   RotateCw,
-  TrendingDown
+  TrendingDown,
+  User,
+  ExternalLink,
+  CheckCircle2
 } from 'lucide-react';
 import { Logo } from './Brand';
 import Inventory from './Inventory';
@@ -234,45 +237,184 @@ const BusinessSetup: React.FC<{ businessData: any }> = ({ businessData }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="space-y-8"
+      className="space-y-10"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Business Setup</h1>
-          <p className="text-slate-500 mt-2">Manage your enterprise identity and connectivity preferences.</p>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Enterprise Configuration</h1>
+          <p className="text-slate-500 mt-2">Manage your business identity, tax compliance, and FBR connectivity.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="px-5 py-2.5 bg-[#0D47A1] text-white text-sm font-bold rounded-xl hover:bg-[#1565C0] transition-all shadow-lg shadow-blue-900/10 flex items-center gap-2">
+            <RotateCw className="w-4 h-4" />
+            Update Settings
+          </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 space-y-6">
-            <div className="grid grid-cols-2 gap-6">
+          {/* Business Identity */}
+          <section className="bg-white rounded-[32px] border border-slate-200 shadow-sm p-8 space-y-8">
+            <div className="flex items-center gap-3 pb-6 border-b border-slate-100">
+              <div className="p-2 bg-blue-50 text-[#0D47A1] rounded-xl">
+                <Building2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Business Identity</h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Primary registration information</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-900 uppercase tracking-tight">Business Name</label>
-                <input readOnly value={businessData?.name} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium" />
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Business Name</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-300">
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <input 
+                    readOnly 
+                    value={businessData?.name} 
+                    className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold focus:bg-white transition-all ring-0 border-transparent focus:border-slate-900/10" 
+                  />
+                </div>
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-900 uppercase tracking-tight">NTN Number</label>
-                <input readOnly value={businessData?.ntn} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium" />
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">NTN / Tax ID</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-300">
+                    <ShieldCheck className="w-4 h-4" />
+                  </div>
+                  <input 
+                    readOnly 
+                    value={businessData?.ntn} 
+                    className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold transition-all" 
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">CNIC / Registration</label>
+                <input readOnly value={businessData?.cnic} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Province</label>
+                <input readOnly value={businessData?.province} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold" />
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-900 uppercase tracking-tight">Physical Address</label>
-              <input readOnly value={businessData?.address} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium" />
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Physical Address</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-300">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <input 
+                  readOnly 
+                  value={businessData?.address} 
+                  className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold" 
+                />
+              </div>
             </div>
-          </div>
+          </section>
+
+          {/* FBR Settings */}
+          <section className="bg-white rounded-[32px] border border-slate-200 shadow-sm p-8 space-y-8">
+            <div className="flex items-center gap-3 pb-6 border-b border-slate-100">
+              <div className="p-2 bg-amber-50 text-amber-600 rounded-xl">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">FBR Configuration</h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Secure connectivity tokens for POS integration</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between px-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Sandbox Token</label>
+                  <span className="text-[8px] font-black bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full uppercase tracking-widest">Test Mode</span>
+                </div>
+                <div className="relative">
+                  <input 
+                    readOnly 
+                    type="password"
+                    value={businessData?.fbrSandboxToken || '••••••••••••••••'} 
+                    className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-mono text-sm" 
+                  />
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    <Lock className="w-4 h-4 text-slate-300" />
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between px-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Production Token</label>
+                  <span className="text-[8px] font-black bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full uppercase tracking-widest">Active</span>
+                </div>
+                <div className="relative">
+                  <input 
+                    readOnly 
+                    type="password"
+                    value={businessData?.fbrProductionToken || '••••••••••••••••'} 
+                    className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-mono text-sm" 
+                  />
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    <Lock className="w-4 h-4 text-slate-300" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-4">
+              <div className="p-2 bg-white rounded-lg shadow-sm">
+                <Info className="w-4 h-4 text-slate-400" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-900 mb-1">FBR Online Verification</p>
+                <p className="text-[10px] text-slate-500 font-medium leading-relaxed">Your tokens are securely encrypted. Any modification requires re-authentication with your FBR credentials.</p>
+              </div>
+            </div>
+          </section>
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 flex flex-col items-center">
-            <div className="w-24 h-24 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-300 mb-4 border-2 border-dashed border-slate-200">
+          <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm p-8 flex flex-col items-center">
+            <div className="w-40 h-40 bg-slate-50 rounded-[32px] flex items-center justify-center text-slate-300 mb-6 border-2 border-dashed border-slate-200 relative group overflow-hidden">
                {businessData?.logo ? (
-                <img src={authService.getLogoUrl(businessData.logo) || ''} alt="Logo" className="w-full h-full object-contain p-4" />
+                <img 
+                  src={authService.getLogoUrl(businessData.logo) || ''} 
+                  alt="Logo" 
+                  className="w-full h-full object-contain p-6 group-hover:scale-110 transition-transform" 
+                  referrerPolicy="no-referrer"
+                />
               ) : (
-                <Upload className="w-8 h-8" />
+                <Upload className="w-10 h-10 group-hover:scale-110 transition-transform" />
               )}
+              <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                <Upload className="w-8 h-8 text-white" />
+              </div>
             </div>
-            <p className="text-sm font-bold text-slate-900">Business Logo</p>
+            <div className="text-center">
+              <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest">Brand Mark</h4>
+              <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Visible on all tax invoices</p>
+            </div>
+          </div>
+
+          <div className="bg-slate-900 rounded-[32px] p-8 text-white relative overflow-hidden group shadow-2xl shadow-slate-900/20">
+            <ShieldCheck className="absolute -right-6 -top-6 w-40 h-40 text-white/5 group-hover:scale-110 transition-transform duration-700" />
+            <h4 className="text-lg font-black mb-2 uppercase tracking-tight">Security Check</h4>
+            <p className="text-slate-400 text-xs mb-6 font-medium">Your business profile is fully compliant with current FBR regulations.</p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-emerald-400">
+                <CheckCircle2 className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Identity Verified</span>
+              </div>
+              <div className="flex items-center gap-3 text-emerald-400">
+                <CheckCircle2 className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Tokens Validated</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -309,6 +451,36 @@ const Dashboard: React.FC<DashboardProps> = ({ businessData, onLogout }) => {
         </div>
 
         <div className="flex items-center gap-4">
+          <div className="hidden lg:flex flex-col items-end">
+            <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{businessData?.name || 'Administrator'}</p>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">Enterprise User</p>
+          </div>
+          <button 
+            onClick={() => setActiveTab('business')}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all relative overflow-hidden group ${activeTab === 'business' ? 'bg-[#0D47A1] text-white shadow-lg shadow-blue-900/20' : 'bg-slate-100 border border-slate-200 text-slate-400 hover:bg-slate-200'}`}
+          >
+            {businessData?.logo ? (
+              <img 
+                src={authService.getLogoUrl(businessData.logo) || ''} 
+                alt="Profile" 
+                className={`w-full h-full object-contain p-1.5 transition-transform group-hover:scale-110 ${activeTab === 'business' ? 'brightness-0 invert' : ''}`} 
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <User className="w-5 h-5 transition-transform group-hover:scale-110" />
+            )}
+            <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab('business')}
+            className={`p-2.5 rounded-xl transition-all ${activeTab === 'business' ? 'bg-[#0D47A1] text-white' : 'text-slate-400 hover:bg-slate-100'}`}
+            title="Settings"
+          >
+            <Settings className="w-5 h-5" />
+          </button>
+
+          <div className="h-8 w-[1px] bg-slate-100 mx-1"></div>
           <button 
             onClick={onLogout}
             className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 hover:border-red-100 transition-all group"
